@@ -12,11 +12,12 @@ class EventController extends Controller
 
     public function __construct()
     {
-        $this->service = new EventService();
+        $this->service = new EventService;
     }
+
     public function callback(Request $request)
     {
         $this->service->handler($request->all());
-        return;
+
     }
 }

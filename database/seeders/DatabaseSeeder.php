@@ -7,12 +7,16 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
+    public function run()
     {
-        $this->call(RolePermissionSeeder::class);
-        $this->call(UserSeeder::class);
+        // Вызов всех сидеров
+        $this->call([
+            UserSeeder::class,
+            ClientSeeder::class,
+            TelegramClientSeeder::class,
+            CompanySeeder::class,
+            EventSeeder::class,
+            BitrixIntegrationSeeder::class,
+        ]);
     }
 }
