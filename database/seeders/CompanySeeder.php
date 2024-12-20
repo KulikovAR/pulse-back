@@ -15,6 +15,6 @@ class CompanySeeder extends Seeder
             return;
         }
 
-        Company::factory(10)->create();  // Создает 10 компаний
+        Company::factory(10)->create();
     }
 }

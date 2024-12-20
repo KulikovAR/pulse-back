@@ -21,8 +21,8 @@ class EventFactory extends Factory
             'name' => $this->faker->word,
             'description' => $this->faker->sentence,
             'event_type' => $this->faker->randomElement(['meeting', 'call', 'task']),
-            'event_time' => $this->faker->dateTime,
-            'repeat_type' => $this->faker->randomElement(RepeatTypeEnum::get()), // Случайное значение из Enum
+            'event_time' => $this->faker->dateTimeBetween('now', '+1 week'),
+            'repeat_type' => $this->faker->randomElement(RepeatTypeEnum::get()),
         ];
     }
 }

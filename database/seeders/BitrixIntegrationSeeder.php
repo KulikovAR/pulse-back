@@ -15,6 +15,6 @@ class BitrixIntegrationSeeder extends Seeder
             return;
         }
 
-        BitrixIntegration::factory(10)->create();  // Создает 10 записей для интеграции
+        BitrixIntegration::factory(10)->create();
     }
 }

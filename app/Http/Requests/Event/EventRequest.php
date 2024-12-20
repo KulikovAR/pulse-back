@@ -2,11 +2,15 @@
 
 namespace App\Http\Requests\Event;
 
-use App\Dto\EventDto;
+use App\Enums\RepeatTypeEnum;
+use App\Http\Requests\Traits\EventTrait;
+use App\Rules\EnumRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EventRequest extends FormRequest
 {
+    use EventTrait;
+
     public function rules(): array
     {
         return [
@@ -17,21 +21,7 @@ class EventRequest extends FormRequest
             'description' => 'nullable|string',
             'event_type' => 'required|string|in:meeting,task',
             'event_time' => 'required|date|after:now',
-            'repeat_type' => 'nullable|string|in:daily,weekly,monthly',
+            'repeat_type' => ['required', new EnumRule(RepeatTypeEnum::class)],
         ];
-    }
-
-    public function toEventDto(): EventDto
-    {
-        return new EventDto(
-            id: $this->input('id'),
-            clientId: $this->input('client_id'),
-            companyId: $this->input('company_id'),
-            name: $this->input('name'),
-            description: $this->input('description'),
-            eventType: $this->input('event_type'),
-            eventTime: $this->input('event_time'),
-            repeatType: $this->input('repeat_type'),
-        );
     }
 }

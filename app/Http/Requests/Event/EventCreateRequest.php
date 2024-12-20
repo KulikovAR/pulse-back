@@ -2,10 +2,15 @@
 
 namespace App\Http\Requests\Event;
 
+use App\Enums\RepeatTypeEnum;
+use App\Http\Requests\Traits\EventTrait;
+use App\Rules\EnumRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EventCreateRequest extends FormRequest
 {
+    use EventTrait;
+
     public function rules(): array
     {
         return [
@@ -15,7 +20,7 @@ class EventCreateRequest extends FormRequest
             'description' => 'nullable|string',
             'event_type' => 'required|string|in:meeting,task',
             'event_time' => 'required|date|after:now',
-            'repeat_type' => 'nullable|string|in:daily,weekly,monthly',
+            'repeat_type' => ['required', new EnumRule(RepeatTypeEnum::class)],
         ];
     }
 }

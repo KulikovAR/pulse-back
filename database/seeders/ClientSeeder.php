@@ -15,6 +15,6 @@ class ClientSeeder extends Seeder
             return;
         }
 
-        Client::factory(10)->create();  // Создает 10 клиентов
+        Client::factory(10)->create();
     }
 }

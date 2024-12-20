@@ -15,6 +15,6 @@ class EventSeeder extends Seeder
             return;
         }
 
-        Event::factory(50)->create();  // Создает 50 событий
+        Event::factory(50)->create();
     }
 }

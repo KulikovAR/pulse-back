@@ -11,41 +11,53 @@ class EventDbRepository implements EventRepositoryContract
 {
     public function list(): EventDtos
     {
-        return new EventDtos(Event::all()->map(fn ($event) => EventDto::makeFromModelEvent($event)));
+        $events = Event::all();
+
+        return $this->mapToEventDtos($events);
     }
 
     public function getByClientId(string $clientId): EventDtos
     {
         $events = Event::where('client_id', $clientId)->get();
 
-        return new EventDtos($events->map(fn ($event) => EventDto::makeFromModelEvent($event)));
+        return $this->mapToEventDtos($events);
     }
 
     public function getById(string $id): EventDto
     {
         $event = Event::findOrFail($id);
 
-        return EventDto::makeFromModelEvent($event);
+        return $this->mapToEventDto($event);
     }
 
     public function create(EventDto $eventDto): EventDto
     {
         $event = Event::create($eventDto->toModelEventArray());
 
-        return EventDto::makeFromModelEvent($event);
+        return $this->mapToEventDto($event);
     }
 
     public function update(EventDto $eventDto): EventDto
     {
-        $event = Event::findOrFail($eventDto->id);
+        $event = Event::findOrFail($eventDto->getId());
         $event->update($eventDto->toModelEventArray());
 
-        return EventDto::makeFromModelEvent($event);
+        return $this->mapToEventDto($event);
     }
 
     public function delete(EventDto $eventDto): void
     {
-        $event = Event::findOrFail($eventDto->id);
+        $event = Event::findOrFail($eventDto->getId());
         $event->delete();
+    }
+
+    private function mapToEventDtos($events): EventDtos
+    {
+        return new EventDtos($events->map(fn ($event) => $this->mapToEventDto($event)));
+    }
+
+    private function mapToEventDto($event): EventDto
+    {
+        return EventDto::makeFromModelEvent($event);
     }
 }

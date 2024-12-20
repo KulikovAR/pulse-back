@@ -7,17 +7,15 @@ use App\Models\Event;
 class EventDto
 {
     public function __construct(
-        private ?string $id = null,               // guid, обязательное поле
-        private ?string $clientId = null,         // guid, обязательное поле
-        private ?string $companyId = null,        // guid, обязательное поле
-        private ?string $name = null,             // Название события
-        private ?string $description = null,     // Необязательное описание
-        private ?string $eventType = null,       // Необязательный тип события
-        private ?string $eventTime = null,        // Время события, обязательное
-        private ?string $repeatType = null,      // Частота повторения, не обязательное поле
+        private ?string $id = null,
+        private ?string $clientId = null,
+        private ?string $companyId = null,
+        private ?string $name = null,
+        private ?string $description = null,
+        private ?string $eventType = null,
+        private ?string $eventTime = null,
+        private ?string $repeatType = null,
     ) {}
-
-    // Геттеры и сеттеры
 
     public function getId(): string
     {
@@ -115,12 +113,12 @@ class EventDto
         return $this;
     }
 
-    // Метод для преобразования в массив (например, для передачи в репозиторий или возвращения в ответ)
     public function toModelEventArray(): array
     {
         return [
             'id' => $this->id,
             'client_id' => $this->clientId,
+            'company_id' => $this->companyId,
             'name' => $this->name,
             'description' => $this->description,
             'event_type' => $this->eventType,
@@ -134,6 +132,7 @@ class EventDto
         return new self(
             $event->id,
             $event->client_id,
+            $event->company_id,
             $event->name,
             $event->description,
             $event->event_type,

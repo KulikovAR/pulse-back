@@ -14,7 +14,7 @@ class TelegramClientFactory extends Factory
     {
         return [
             'id' => $this->faker->uuid,
-            'client_id' => Client::factory(),  // Генерация связанного клиента
+            'client_id' => Client::factory(),
             'chat_id' => $this->faker->unique()->userName,
         ];
     }

@@ -18,7 +18,7 @@ class Company extends Model
     ];
 
     protected $casts = [
-        'services' => 'array', // JSON
+        'services' => 'array',
     ];
 
     public function user(): BelongsTo

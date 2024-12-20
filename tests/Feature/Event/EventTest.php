@@ -24,95 +24,108 @@ class EventTest extends TestCase
         $this->actingAs($user);
     }
 
-    public function test_it_fetches_events_by_client_id()
+    public function test_get_events_by_client_id()
     {
-        // Arrange: создаем клиента и связанные с ним события
+        // Создание клиента и событий для него
         $client = Client::factory()->create();
         $events = Event::factory()->count(3)->create(['client_id' => $client->id]);
 
-        // Act: отправляем GET-запрос
+        // Отправляем GET-запрос
         $response = $this->getJson("/api/v1/events/{$client->id}");
 
-        //debug
-        $responseData = $response->json();
-        dd($responseData); // Это выведет структуру данных
-
-        // Assert: проверяем статус ответа
+        // Проверяем, что запрос прошел успешно
         $response->assertStatus(200);
 
-        // Проверяем, что данные в 'data' — это объекты EventDto
-        $responseData = $response->json('data');
-        $this->assertCount(3, $responseData);
-
-        // Проверка, что каждый элемент в данных — это объект EventDto
-        foreach ($responseData as $eventData) {
-            $this->assertArrayHasKey('id', $eventData);
-            $this->assertArrayHasKey('client_id', $eventData);
-            $this->assertArrayHasKey('name', $eventData);
-            $this->assertArrayHasKey('description', $eventData);
-            $this->assertArrayHasKey('event_time', $eventData);
-            $this->assertArrayHasKey('repeat_type', $eventData);
-        }
+        // Проверяем структуру данных
+        $response->assertJsonCount(3, 'data');  // должно быть 3 события
     }
 
-    // public function test_it_creates_an_event()
-    // {
-    //     // Arrange: создаем клиента и компанию
-    //     $client = Client::factory()->create();
-    //     $company = Company::factory()->create();
-    //     $payload = [
-    //         'id' => \Illuminate\Support\Str::uuid(),
-    //         'client_id' => $client->id,
-    //         'company_id' => $company->id,
-    //         'name' => 'Test Event',
-    //         'description' => 'Description for the test event',
-    //         'event_type' => 'meeting',
-    //         'event_time' => now()->addMinutes(10)->toDateTimeString(),
-    //         'repeat_type' => 'daily',
-    //     ];
+    public function test_get_event_by_id()
+    {
+        // Создание события
+        $event = Event::factory()->create();
 
-    //     // Act: отправляем POST-запрос
-    //     $response = $this->postJson('/api/v1/event', $payload);
+        // Отправляем GET-запрос
+        $response = $this->getJson("/api/v1/event/{$event->id}");
 
-    //     // Assert: проверяем успешное создание
-    //     $response->assertStatus(201);
+        // Проверяем, что запрос прошел успешно
+        $response->assertStatus(200);
 
-    //     // Проверяем, что объект EventDto в ответе
-    //     $responseData = $response->json('data');
-    //     $this->assertArrayHasKey('id', $responseData);
-    //     $this->assertEquals($payload['name'], $responseData['name']);
-    //     $this->assertDatabaseHas('events', ['name' => 'Test Event']);
-    // }
+        // Проверяем, что данные в ответе соответствуют событию
+        $response->assertJsonFragment([
+            'id' => $event->id,
+            'name' => $event->name,
+        ]);
+    }
 
-    // public function test_it_updates_an_event()
-    // {
-    //     // Arrange: создаем событие
-    //     $event = Event::factory()->create();
-    //     $payload = ['name' => 'Updated Event Name'];
+    public function test_create_event()
+    {
+        // Подготовка данных для создания события
+        $client = Client::factory()->create();
+        $payload = [
+            'client_id' => $client->id,
+            'company_id' => Company::factory()->create()->id,
+            'name' => 'Test Event',
+            'event_type' => 'meeting',
+            'event_time' => now()->addDay()->toDateTimeString(),
+            'repeat_type' => 'daily',
+        ];
 
-    //     // Act: отправляем PUT-запрос
-    //     $response = $this->putJson("/api/v1/event/{$event->id}", $payload);
+        // Отправляем POST-запрос
+        $response = $this->postJson('/api/v1/event', $payload);
 
-    //     // Assert: проверяем обновление
-    //     $response->assertStatus(200);
+        // Проверяем, что запрос прошел успешно
+        $response->assertStatus(201);
 
-    //     // Проверяем, что объект EventDto в ответе
-    //     $responseData = $response->json('data');
-    //     $this->assertArrayHasKey('id', $responseData);
-    //     $this->assertEquals('Updated Event Name', $responseData['name']);
-    //     $this->assertDatabaseHas('events', ['id' => $event->id, 'name' => 'Updated Event Name']);
-    // }
+        // Проверяем, что событие создано
+        $response->assertJsonFragment([
+            'name' => 'Test Event',
+            'event_type' => 'meeting',
+        ]);
+    }
 
-    // public function test_it_deletes_an_event()
-    // {
-    //     // Arrange: создаем событие
-    //     $event = Event::factory()->create();
+    public function test_update_event()
+    {
+        // Создание события
+        $event = Event::factory()->create();
 
-    //     // Act: отправляем DELETE-запрос
-    //     $response = $this->deleteJson("/api/v1/event/{$event->id}");
+        // Данные для обновления
+        $payload = [
+            'client_id' => $event->client_id,
+            'company_id' => $event->company_id,
+            'name' => 'Updated Event',
+            'event_type' => 'task',
+            'event_time' => now()->addDays(2)->toDateTimeString(),
+            'repeat_type' => 'weekly',
+        ];
 
-    //     // Assert: проверяем удаление
-    //     $response->assertStatus(204);
-    //     $this->assertDatabaseMissing('events', ['id' => $event->id]);
-    // }
+        // Отправляем PUT-запрос
+        $response = $this->putJson("/api/v1/event/{$event->id}", $payload);
+
+        // Проверяем, что запрос прошел успешно
+        $response->assertStatus(200);
+
+        // Проверяем, что данные обновлены
+        $response->assertJsonFragment([
+            'name' => 'Updated Event',
+            'event_type' => 'task',
+        ]);
+    }
+
+    public function test_delete_event()
+    {
+        // Создание события
+        $event = Event::factory()->create();
+
+        // Отправляем DELETE-запрос
+        $response = $this->deleteJson("/api/v1/event/{$event->id}");
+
+        // Проверяем, что запрос прошел успешно
+        $response->assertStatus(200);
+
+        // Проверяем, что событие удалено
+        $this->assertDatabaseMissing('events', [
+            'id' => $event->id,
+        ]);
+    }
 }

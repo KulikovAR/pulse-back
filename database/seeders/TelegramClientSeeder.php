@@ -15,6 +15,6 @@ class TelegramClientSeeder extends Seeder
             return;
         }
 
-        TelegramClient::factory(10)->create();  // Создает 10 Telegram клиентов
+        TelegramClient::factory(10)->create();
     }
 }
