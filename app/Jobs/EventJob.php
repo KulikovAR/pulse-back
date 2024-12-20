@@ -12,7 +12,6 @@ use Illuminate\Queue\SerializesModels;
 /**
  * KonurEventJob
  */
-
 class EventJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -22,7 +21,7 @@ class EventJob implements ShouldQueue
     public function __construct(
         protected array $data
     ) {
-        $this->service = new EventService();
+        $this->service = new EventService;
     }
 
     /**

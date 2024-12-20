@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\V1\EventController;
+use App\Http\Controllers\Api\V1\TelegramController;
 use App\Http\Controllers\AssetsController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
@@ -29,3 +31,25 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('/assets/{locale?}', [AssetsController::class, 'show'])->name('assets.index');
+
+// Route::prefix('')->group(function () {
+//     Route::get('telegram/client/{chat_id}', [TelegramController::class, 'getClientByChatId']);
+//     Route::get('events/{client_id}', [EventController::class, 'getEventsByClientId']);
+//     Route::get('event/{id}', [EventController::class, 'getEventById']);
+//     Route::post('event', [EventController::class, 'createEvent']);
+//     Route::put('event/{id}', [EventController::class, 'updateEvent']);
+//     Route::delete('event/{id}', [EventController::class, 'deleteEvent']);
+// });
+
+Route::prefix('telegram')->group(function () {
+    Route::get('/client/{chat_id}', [TelegramController::class, 'getClientByChatId']);
+});
+
+Route::get('events/{client_id}', [EventController::class, 'getEventsByClientId']);
+
+Route::prefix('event')->group(function () {
+    Route::get('/{id}', [EventController::class, 'getEventById']);
+    Route::post('', [EventController::class, 'createEvent']);
+    Route::put('/{id}', [EventController::class, 'updateEvent']);
+    Route::delete('/{id}', [EventController::class, 'deleteEvent']);
+});
