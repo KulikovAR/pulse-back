@@ -49,6 +49,12 @@ services:
       - LETSENCRYPT_HOST=${EXAMPLE_HOSTNAME}
       - LETSENCRYPT_EMAIL=${EXAMPLE_EMAIL}
 
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
 networks:
   example:
     driver: bridge

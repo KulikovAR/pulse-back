@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Dto\EventDto;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Event\EventRequest;
+use App\Http\Resources\Event\EventCollection;
+use App\Http\Resources\Event\EventResource;
+use App\Http\Responses\ApiJsonResponse;
+use App\Http\Services\EventService;
+use App\Repositories\EventDbRepository;
+
+class EventController extends Controller
+{
+    private EventService $service;
+
+    public function __construct()
+    {
+        $this->service = new EventService(
+            new EventDbRepository
+        );
+    }
+
+    public function getEventsByClientId($clientId)
+    {
+        $events = $this->service->getEventsByClientId($clientId);
+
+        return new ApiJsonResponse(data: new EventCollection($events));
+    }
+
+    public function getEventById($id)
+    {
+        $event = $this->service->getEventById($id);
+
+        return new ApiJsonResponse(data: new EventResource($event));
+    }
+
+    public function createEvent(EventRequest $request)
+    {
+        $eventDto = $request->toEventDto();
+        $event = $this->service->createEvent($eventDto);
+
+        return new ApiJsonResponse(data: new EventResource($event), httpCode: 201);
+    }
+
+    public function updateEvent(EventRequest $request, $id)
+    {
+        $eventDto = $request->toEventDto();
+        $eventDto->setId($id);
+        $event = $this->service->updateEvent($eventDto);
+
+        return new ApiJsonResponse(data: new EventResource($event));
+    }
+
+    public function deleteEvent($id)
+    {
+        $eventDto = new EventDto;
+        $eventDto->setId($id);
+        $this->service->deleteEvent($eventDto);
+
+        return new ApiJsonResponse(data: ['message' => 'Event deleted successfully.']);
+    }
+}
