@@ -39,7 +39,7 @@ class UserSeeder extends Seeder
                 'email' => self::ADMIN_EMAIL,
             ]
         );
-        $userAdmin->assignRole(Role::ROLE_ADMIN);
+        // $userAdmin->assignRole(Role::ROLE_ADMIN);
 
         $user = User::factory()->create(
             [
@@ -48,6 +48,6 @@ class UserSeeder extends Seeder
                 'email' => self::USER_EMAIL,
             ],
         );
-        $user->assignRole(Role::ROLE_USER);
+        // $user->assignRole(Role::ROLE_USER);
     }
 }

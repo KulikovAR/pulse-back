@@ -17,6 +17,8 @@ class AuthTest extends TestCase
             ]
         );
 
+        dd($response);
+
         $response->assertJsonStructure(
             [
                 'ok',
