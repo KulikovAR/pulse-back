@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Requests\Traits\CreatesUserWithClient;
 use App\Traits\HasRefreshToken;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasRefreshToken, HasRoles, HasUuids, Notifiable, SoftDeletes;
+    use CreatesUserWithClient, HasApiTokens, HasFactory, HasRefreshToken, HasRoles, HasUuids, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

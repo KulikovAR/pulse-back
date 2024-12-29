@@ -3,16 +3,18 @@
 namespace App\Http\Services;
 
 use App\Contracts\ClientInterface;
+use App\Http\Requests\Traits\CreatesUserWithClient;
 use App\Http\Responses\ApiJsonResponse;
 use App\Models\Client;
 use App\Models\TelegramClient;
 use App\Models\User;
 use App\Services\Telegram\Auth\CheckAuth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class TelegramClientService implements ClientInterface
 {
+    use CreatesUserWithClient;
+
     private $authChecker;
 
     public function __construct(CheckAuth $authChecker)
@@ -29,80 +31,94 @@ class TelegramClientService implements ClientInterface
             return new ApiJsonResponse(data: ['error' => 'Unauthorized'], httpCode: 401);
         }
 
-        // Ищем пользователя по chat_id
+        // Ищем Telegram клиента по chat_id
         $telegramClient = TelegramClient::where('chat_id', $data['id'])->first();
-
         if ($telegramClient) {
-
-            if (! $telegramClient->client->user_id) {
-                return new ApiJsonResponse(
-                    httpCode: 500,
-                    ok: false,
-                    message: 'No associated user found for TelegramClient'
-                );
-            }
-
-            $token = $telegramClient->client->user->createToken('api-token')->plainTextToken;
-
-            return new ApiJsonResponse(data: ['token' => $token]);
+            return $this->handleExistingTelegramClient($telegramClient);
         }
 
-        // Если нет, проверяем phone
+        // Если передан phone
         if (isset($data['phone'])) {
-            $client = Client::where('phone', $data['phone'])->first();
-            if (! $client) {
-                $user = User::create([
-                    'name' => $data['first_name'] ?? 'User',
-                    'email' => $data['username'].'@telegram.local',
-                    'password' => Hash::make('defaultpassword'),
-                ]);
-
-                $client = Client::create([
-                    'user_id' => $user->id,
-                    'phone' => $data['phone'],
-                    'name' => $data['first_name'] ?? 'User',
-                ]);
-            }
-
-            $user = $client->user ?: User::create([
-                'name' => $data['first_name'] ?? 'User',
-                'email' => $data['username'].'@telegram.local',
-                'password' => Hash::make('defaultpassword'),
-            ]);
-
-            $telegramClient = TelegramClient::create([
-                'chat_id' => $data['id'],
-                'username' => $data['username'] ?? null,
-                'client_id' => $client->id,
-            ]);
-
-            $token = $user->createToken('api-token')->plainTextToken;
-
-            return new ApiJsonResponse(data: ['token' => $token], httpCode: 200);
+            return $this->handleClientByPhone($data);
         }
 
         // Если phone не указан
-        $user = User::create([
-            'name' => $data['first_name'] ?? 'User',
-            'email' => $data['username'].'@telegram.local',
-            'password' => Hash::make('defaultpassword'),
-        ]);
-
-        $client = Client::create([
-            'user_id' => $user->id,
+        return $this->createUserClientAndTelegramClient($data, [
             'username' => $data['username'],
             'name' => $data['first_name'] ?? 'User',
         ]);
+    }
 
-        $telegramClient = TelegramClient::create([
+    private function handleExistingTelegramClient(TelegramClient $telegramClient): ApiJsonResponse
+    {
+        if (! $telegramClient->client->user_id) {
+            return new ApiJsonResponse(
+                httpCode: 500,
+                ok: false,
+                message: 'No associated user found for TelegramClient'
+            );
+        }
+
+        $token = $telegramClient->client->user->createToken('api-token')->plainTextToken;
+
+        return new ApiJsonResponse(data: ['token' => $token]);
+    }
+
+    private function handleClientByPhone(array $data): ApiJsonResponse
+    {
+        $client = Client::where('phone', $data['phone'])->first();
+
+        if (! $client) {
+            // Создаем клиента и пользователя, если клиента не существует
+            return $this->createUserClientAndTelegramClient($data, [
+                'phone' => $data['phone'],
+                'name' => $data['first_name'] ?? 'User',
+            ]);
+        }
+
+        if (! $client->user_id) {
+            // Создаем нового пользователя
+            $user = $this->createNewUser($data);
+
+            // Сохраняем user_id в клиенте
+            $client->update(['user_id' => $user->id]);
+        } else {
+            $user = $client->user;
+        }
+
+        TelegramClient::create([
             'chat_id' => $data['id'],
             'username' => $data['username'] ?? null,
             'client_id' => $client->id,
-            'user_id' => $user->id,
         ]);
 
         $token = $user->createToken('api-token')->plainTextToken;
 
         return new ApiJsonResponse(data: ['token' => $token], httpCode: 200);
+    }
+
+    private function createUserClientAndTelegramClient(array $data, array $clientData): ApiJsonResponse
+    {
+        ['user' => $user, 'client' => $client] = $this->createUserWithClient(
+            $data,
+            $clientData
+        );
+
+        TelegramClient::create([
+            'chat_id' => $data['id'],
+            'username' => $data['username'] ?? null,
+            'client_id' => $client->id,
+        ]);
+
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        return new ApiJsonResponse(data: ['token' => $token], httpCode: 200);
+    }
+
+    private function createNewUser(array $data): User
+    {
+        return User::create([
+            'name' => $data['first_name'] ?? 'User',
+        ]);
     }
 }

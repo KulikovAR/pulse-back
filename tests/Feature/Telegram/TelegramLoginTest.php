@@ -26,7 +26,7 @@ class TelegramLoginTest extends TestCase
         $this->app->instance('App\Services\Telegram\Auth\CheckAuth', $checkAuthMock);
 
         // Делаем запрос
-        $response = $this->postJson('/api/v1/telegram/login', [
+        $response = $this->postJson(route('telegram.login'), [
             'id' => '12345',
             'hash' => 'validhash',
             'first_name' => 'John',
@@ -51,7 +51,7 @@ class TelegramLoginTest extends TestCase
         $this->app->instance('App\Services\Telegram\Auth\CheckAuth', $checkAuthMock);
 
         // Делаем запрос
-        $response = $this->postJson('/api/v1/telegram/login', [
+        $response = $this->postJson(route('telegram.login'), [
             'id' => '123456',
             'hash' => 'validhash',
             'first_name' => 'John',
@@ -73,7 +73,7 @@ class TelegramLoginTest extends TestCase
         $this->app->instance('App\Services\Telegram\Auth\CheckAuth', $checkAuthMock);
 
         // Делаем запрос с номером телефона
-        $response = $this->postJson('/api/v1/telegram/login', [
+        $response = $this->postJson(route('telegram.login'), [
             'id' => '12345',
             'hash' => 'validhash',
             'first_name' => 'John',
@@ -95,7 +95,7 @@ class TelegramLoginTest extends TestCase
         $this->app->instance('App\Services\Telegram\Auth\CheckAuth', $checkAuthMock);
 
         // Делаем запрос с параметром телефона
-        $response = $this->postJson('/api/v1/telegram/login', [
+        $response = $this->postJson(route('telegram.login'), [
             'id' => '12345',
             'hash' => 'validhash',
             'first_name' => 'John',
@@ -114,7 +114,7 @@ class TelegramLoginTest extends TestCase
         $this->app->instance('App\Services\Telegram\Auth\CheckAuth', $checkAuthMock);
 
         // Делаем запрос без параметра телефона
-        $response = $this->postJson('/api/v1/telegram/login', [
+        $response = $this->postJson(route('telegram.login'), [
             'id' => '12345',
             'hash' => 'validhash',
             'first_name' => 'John',
