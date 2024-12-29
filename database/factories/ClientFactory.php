@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Client;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ClientFactory extends Factory
@@ -13,7 +14,7 @@ class ClientFactory extends Factory
     {
         return [
             'id' => $this->faker->uuid,
-            'user_id' => null,
+            'user_id' => User::factory(),
             'name' => $this->faker->name,
             'phone' => $this->faker->phoneNumber,
         ];

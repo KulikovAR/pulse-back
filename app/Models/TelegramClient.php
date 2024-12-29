@@ -11,10 +11,15 @@ class TelegramClient extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = ['id', 'client_id', 'chat_id'];
+    protected $fillable = ['id', 'client_id', 'chat_id', 'username'];
 
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
     }
+
+    // public function user()
+    // {
+    //     return $this->client->user();
+    // }
 }
