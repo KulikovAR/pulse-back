@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('user_id')->nullable();
-            $table->string('name');
-            $table->string('phone');
+            $table->string('name')->nullable();
+            $table->string('phone')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');

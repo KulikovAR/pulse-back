@@ -43,6 +43,7 @@ Route::get('/assets/{locale?}', [AssetsController::class, 'show'])->name('assets
 
 Route::prefix('telegram')->group(function () {
     Route::get('/client/{chat_id}', [TelegramController::class, 'getClientByChatId']);
+    Route::post('/login', [TelegramController::class, 'login'])->name('telegram.login');
 });
 
 Route::get('events/{client_id}', [EventController::class, 'getEventsByClientId']);
