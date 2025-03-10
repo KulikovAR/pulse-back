@@ -15,8 +15,10 @@ class DatabaseSeeder extends Seeder
             ClientSeeder::class,
             TelegramClientSeeder::class,
             CompanySeeder::class,
+            CompanyClientSeeder::class,
             EventSeeder::class,
             BitrixIntegrationSeeder::class,
+            ServiceSeeder::class,
         ]);
     }
 }

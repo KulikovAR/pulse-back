@@ -40,6 +40,35 @@ class EventTest extends TestCase
         $response->assertJsonCount(3, 'data');  // должно быть 3 события
     }
 
+    public function test_get_events_by_company_id()
+    {
+        // Создание компании и событий для нее
+        $company = Company::factory()->create();
+        $events = Event::factory()->count(3)->create(['company_id' => $company->id]);
+
+        // Отправляем GET-запрос
+        $response = $this->getJson("/api/v1/events/company/{$company->id}");
+        
+        // Проверяем успешный статус ответа
+        $response->assertStatus(200);
+
+        // Проверяем структуру данных
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'id',
+                    'name',
+                    'event_type',
+                    'event_time',
+                    'repeat_type'
+                ]
+            ]
+        ]);
+
+        // Проверяем количество событий
+        $response->assertJsonCount(3, 'data');
+    }
+
     public function test_get_event_by_id()
     {
         // Создание события

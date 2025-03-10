@@ -16,7 +16,7 @@ class ClientFactory extends Factory
             'id' => $this->faker->uuid,
             'user_id' => User::factory(),
             'name' => $this->faker->name,
-            'phone' => $this->faker->phoneNumber,
+            'phone' => $this->faker->numerify('+7#########'),
         ];
     }
 }

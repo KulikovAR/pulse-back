@@ -51,4 +51,14 @@ class User extends Authenticatable
         'deleted_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function company()
+    {
+        return $this->hasOne(Company::class);
+    }
+
+    public function client()
+    {
+        return $this->hasOne(Client::class);
+    }
 }

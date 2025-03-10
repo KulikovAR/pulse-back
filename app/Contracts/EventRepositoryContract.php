@@ -16,4 +16,6 @@ interface EventRepositoryContract
     public function update(EventDto $eventDto): EventDto;
 
     public function delete(EventDto $eventDto): void;
+
+    public function getByCompanyId(string $companyId): EventDtos;
 }

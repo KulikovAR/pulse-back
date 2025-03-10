@@ -18,8 +18,8 @@ class CompanyFactory extends Factory
             'name' => $this->faker->company,
             'description' => $this->faker->sentence,
             'image' => $this->faker->imageUrl,
-            'services' => json_encode(['service1', 'service2']),
             'category' => $this->faker->word,
+            'address' => $this->faker->address,
         ];
     }
 }

@@ -10,6 +10,7 @@ use App\Http\Resources\Event\EventResource;
 use App\Http\Responses\ApiJsonResponse;
 use App\Http\Services\EventService;
 use App\Repositories\EventDbRepository;
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
@@ -22,9 +23,18 @@ class EventController extends Controller
         );
     }
 
-    public function getEventsByClientId($clientId)
+    public function getEventsByClientId()
     {
+        $clientId = Auth::user()->client->id;
         $events = $this->service->getEventsByClientId($clientId);
+
+        return new ApiJsonResponse(data: new EventCollection($events));
+    }
+
+    public function getEventsByCompanyId()
+    {
+        $companyId = Auth::user()->company->id;
+        $events = $this->service->getEventsByCompanyId($companyId);
 
         return new ApiJsonResponse(data: new EventCollection($events));
     }
