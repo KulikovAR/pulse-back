@@ -26,6 +26,7 @@ trait EventTrait
             eventType: $this->input('event_type'),
             eventTime: $this->input('event_time'),
             repeatType: $this->input('repeat_type'),
+            targetTime: $this->input('target_time'),
         );
     }
 }

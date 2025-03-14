@@ -4,7 +4,6 @@ namespace App\Enums;
 
 enum RepeatTypeEnum: string
 {
-    case DAILY = 'daily';
     case WEEKLY = 'weekly';
     case BIWEEKLY = 'biweekly';
     case MONTHLY = 'monthly';

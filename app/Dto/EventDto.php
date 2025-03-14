@@ -15,6 +15,7 @@ class EventDto
         private ?string $eventType = null,
         private ?string $eventTime = null,
         private ?string $repeatType = null,
+        private ?string $targetTime = null,
     ) {}
 
     public function getId(): string
@@ -113,6 +114,18 @@ class EventDto
         return $this;
     }
 
+    public function getTargetTime(): ?string
+    {
+        return $this->targetTime;
+    }
+
+    public function setTargetTime(?string $targetTime): EventDto
+    {
+        $this->targetTime = $targetTime;
+
+        return $this;
+    }
+
     public function toModelEventArray(): array
     {
         return [
@@ -124,6 +137,7 @@ class EventDto
             'event_type' => $this->eventType,
             'event_time' => $this->eventTime,
             'repeat_type' => $this->repeatType,
+            'target_time' => $this->targetTime,
         ];
     }
 
@@ -138,6 +152,7 @@ class EventDto
             $event->event_type,
             $event->event_time,
             $event->repeat_type,
+            $event->target_time,
         );
     }
 }
