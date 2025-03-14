@@ -8,6 +8,7 @@ use App\Http\Responses\ApiJsonResponse;
 use App\Models\Client;
 use App\Models\TelegramClient;
 use App\Models\User;
+use App\Models\Company;
 use App\Services\Telegram\Auth\CheckAuth;
 use Illuminate\Http\Request;
 
@@ -47,6 +48,71 @@ class TelegramClientService implements ClientInterface
             'username' => $data['username'],
             'name' => $data['first_name'] ?? 'User',
         ]);
+    }
+
+    private function createCompanyForUser(User $user): void
+    {
+        if (!$user->company()->exists()) {
+            Company::create([
+                'name' => 'Company ' . $user->name,
+                'user_id' => $user->id
+            ]);
+        }
+    }
+
+    private function getUserFromToken(string $token): ?User
+    {
+        return User::whereHas('tokens', function($query) use ($token) {
+            $query->where('token', hash('sha256', $token));
+        })->first();
+    }
+
+    public function adminLogin(Request $request): ApiJsonResponse
+    {
+        $data = $request->all();
+
+        if (!$this->authChecker->checkTelegramAuthorization($data, env('TELEGRAM_BOT_TOKEN'))) {
+            return new ApiJsonResponse(data: ['error' => 'Unauthorized'], httpCode: 401);
+        }
+
+        $telegramClient = TelegramClient::where('chat_id', $data['id'])->first();
+        
+        if ($telegramClient) {
+            $response = $this->handleExistingTelegramClient($telegramClient);
+            
+            if ($response->httpCode === 200) {
+                $this->createCompanyForUser($telegramClient->client->user);
+            }
+            
+            return $response;
+        }
+
+        if (isset($data['phone'])) {
+            $response = $this->handleClientByPhone($data);
+            
+            if ($response->httpCode === 200) {
+                $user = $this->getUserFromToken($response->data['token']);
+                if ($user) {
+                    $this->createCompanyForUser($user);
+                }
+            }
+            
+            return $response;
+        }
+
+        $response = $this->createUserClientAndTelegramClient($data, [
+            'username' => $data['username'],
+            'name' => $data['first_name'] ?? 'User',
+        ]);
+        
+        if ($response->httpCode === 200) {
+            $user = $this->getUserFromToken($response->data['token']);
+            if ($user) {
+                $this->createCompanyForUser($user);
+            }
+        }
+        
+        return $response;
     }
 
     private function handleExistingTelegramClient(TelegramClient $telegramClient): ApiJsonResponse

@@ -28,4 +28,9 @@ class Client extends Model
     {
         return $this->hasMany(Event::class);
     }
+
+    public function companyClient(): HasMany
+    {
+        return $this->hasMany(CompanyClient::class);
+    }
 }

@@ -22,6 +22,11 @@ class TelegramController extends Controller
         return $this->service->login($request);
     }
 
+    public function adminLogin(TelegramClientLoginRequest $request): ApiJsonResponse
+    {
+        return $this->service->adminLogin($request);
+    }
+
     public function getClientByChatId($chatId)
     {
         $telegramClient = TelegramClient::where('chat_id', $chatId)->first();

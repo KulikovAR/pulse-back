@@ -22,6 +22,11 @@ class EventService
         return $this->repository->getByClientId($clientId);
     }
 
+    public function getEventsByCompanyId(string $companyId): EventDtos
+    {
+        return $this->repository->getByCompanyId($companyId);
+    }
+
     public function getEventById(string $id): EventDto
     {
         return $this->repository->getById($id);

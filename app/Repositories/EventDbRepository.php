@@ -23,6 +23,13 @@ class EventDbRepository implements EventRepositoryContract
         return $this->mapToEventDtos($events);
     }
 
+    public function getByCompanyId(string $companyId): EventDtos
+    {
+        $events = Event::where('company_id', $companyId)->get();
+
+        return $this->mapToEventDtos($events);
+    }
+
     public function getById(string $id): EventDto
     {
         $event = Event::findOrFail($id);

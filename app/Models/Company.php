@@ -14,12 +14,13 @@ class Company extends Model
 
     protected $fillable = [
         'id', 'user_id', 'name', 'description', 'image',
-        'services', 'category',
+        'category', 'address',
     ];
 
-    protected $casts = [
-        'services' => 'array',
-    ];
+    public function services(): HasMany
+    {
+        return $this->hasMany(Service::class);
+    }
 
     public function user(): BelongsTo
     {

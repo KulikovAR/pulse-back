@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Event;
+namespace AppHttpRequestsEvent;
 
 use App\Enums\RepeatTypeEnum;
 use App\Http\Requests\Traits\EventTrait;
@@ -15,7 +15,6 @@ class EventCreateRequest extends FormRequest
     {
         return [
             'client_id' => 'required|uuid|exists:clients,id',
-            'company_id' => 'required|uuid|exists:companies,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'event_type' => 'required|string|in:meeting,task',
