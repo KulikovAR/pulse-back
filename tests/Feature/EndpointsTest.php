@@ -683,7 +683,7 @@ class EndpointsTest extends TestCase
             'description' => 'Test Event Description',
             'event_type' => 'meeting',
             'event_time' => now()->addDay()->format('Y-m-d H:i:s'),
-            'repeat_type' => 'daily',
+            'repeat_type' => 'weekly',
             'client_id' => $client->id
         ];
 
@@ -709,7 +709,7 @@ class EndpointsTest extends TestCase
             'name' => 'Test Event',
             'description' => 'Test Event Description',
             'event_type' => 'meeting',
-            'repeat_type' => 'daily',
+            'repeat_type' => 'weekly',
             'company_id' => $company->id,
             'client_id' => $client->id
         ]);
