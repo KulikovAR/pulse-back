@@ -46,7 +46,7 @@ class EndpointsTest extends TestCase
                     'data' => [
                         '*' => [
                             'id',
-                            'name',
+                            'service_id',
                             'description',
                             'event_type',
                             'event_time',
@@ -92,7 +92,7 @@ class EndpointsTest extends TestCase
                     'data' => [
                         '*' => [
                             'id',
-                            'name',
+                            'service_id',
                             'description',
                             'event_type',
                             'event_time',
@@ -675,11 +675,12 @@ class EndpointsTest extends TestCase
             'user_id' => $user->id,
         ]);
         $client = Client::factory()->create();
+        $service = Service::factory()->create();
 
         $token = $user->createToken('test-token')->plainTextToken;
 
         $eventData = [
-            'name' => 'Test Event',
+            'service_id' => $service->id,
             'description' => 'Test Event Description',
             'event_type' => 'meeting',
             'event_time' => now()->addDay()->format('Y-m-d H:i:s'),
@@ -695,7 +696,7 @@ class EndpointsTest extends TestCase
                 ->assertJsonStructure([
                     'data' => [
                         'id',
-                        'name',
+                        'service_id',
                         'description',
                         'event_type',
                         'event_time',
@@ -706,7 +707,7 @@ class EndpointsTest extends TestCase
                 ]);
 
         $this->assertDatabaseHas('events', [
-            'name' => 'Test Event',
+            'service_id' => $service->id,
             'description' => 'Test Event Description',
             'event_type' => 'meeting',
             'repeat_type' => 'weekly',

@@ -138,6 +138,7 @@ class TelegramClientService implements ClientInterface
             // Создаем клиента и пользователя, если клиента не существует
             return $this->createUserClientAndTelegramClient($data, [
                 'phone' => $data['phone'],
+                'username' => $data['username'],
                 'name' => $data['first_name'] ?? 'User',
             ]);
         }

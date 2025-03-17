@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('client_id');
             $table->uuid('company_id');
-            $table->string('name');
+            $table->uuid('service_id');
             $table->string('description')->nullable();
             $table->string('event_type')->nullable();
             $table->timestamp('event_time');
@@ -25,6 +25,7 @@ return new class extends Migration
 
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            $table->foreign('service_id')->references('id')->on('services')->onDelete('cascade');
         });
     }
 

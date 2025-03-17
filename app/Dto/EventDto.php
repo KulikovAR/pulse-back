@@ -10,7 +10,8 @@ class EventDto
         private ?string $id = null,
         private ?string $clientId = null,
         private ?string $companyId = null,
-        private ?string $name = null,
+        private ?string $serviceId = null,
+        public ?object $service = null,
         private ?string $description = null,
         private ?string $eventType = null,
         private ?string $eventTime = null,
@@ -54,14 +55,14 @@ class EventDto
         return $this;
     }
 
-    public function getName(): string
+    public function getServiceId(): string
     {
-        return $this->name;
+        return $this->serviceId;
     }
 
-    public function setName(string $name): EventDto
+    public function setServiceId(string $serviceId): EventDto
     {
-        $this->name = $name;
+        $this->serviceId = $serviceId;
 
         return $this;
     }
@@ -125,6 +126,17 @@ class EventDto
 
         return $this;
     }
+    
+    public function getService(): ?object
+    {
+        return $this->service;
+    }
+
+    public function setService(?object $service): self
+    {
+        $this->service = $service;
+        return $this;
+    }
 
     public function toModelEventArray(): array
     {
@@ -132,7 +144,7 @@ class EventDto
             'id' => $this->id,
             'client_id' => $this->clientId,
             'company_id' => $this->companyId,
-            'name' => $this->name,
+            'service_id' => $this->serviceId,
             'description' => $this->description,
             'event_type' => $this->eventType,
             'event_time' => $this->eventTime,
@@ -147,12 +159,14 @@ class EventDto
             $event->id,
             $event->client_id,
             $event->company_id,
-            $event->name,
+            $event->service_id,
+            $event->service,
             $event->description,
             $event->event_type,
             $event->event_time,
             $event->repeat_type,
-            $event->target_time,
+            $event->target_time
         );
     }
+
 }

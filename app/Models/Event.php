@@ -17,7 +17,7 @@ class Event extends Model
         'id',
         'client_id',
         'company_id',
-        'name',
+        'service_id',
         'description',
         'event_type',
         'event_time',
@@ -33,6 +33,11 @@ class Event extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 
     public function repeats()
