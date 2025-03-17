@@ -21,7 +21,7 @@ trait EventTrait
             id: $this->input('id'),
             clientId: $this->input('client_id'),
             companyId: $company->id,
-            name: $this->input('name'),
+            serviceId: $this->input('service_id'),
             description: $this->input('description'),
             eventType: $this->input('event_type'),
             eventTime: $this->input('event_time'),
