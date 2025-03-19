@@ -19,7 +19,6 @@ class EventFactory extends Factory
             'id' => $this->faker->uuid,
             'client_id' => Client::factory(),
             'company_id' => Company::factory(),
-            'service_id' => Service::factory(),
             'description' => $this->faker->sentence,
             'event_type' => $this->faker->randomElement(['meeting', 'call', 'task']),
             'event_time' => $this->faker->dateTimeBetween('now', '+1 week'),

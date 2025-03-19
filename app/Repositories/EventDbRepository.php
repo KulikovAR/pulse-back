@@ -6,6 +6,7 @@ use App\Contracts\EventRepositoryContract;
 use App\Dto\EventDto;
 use App\Dto\EventDtos;
 use App\Models\Event;
+use App\Models\EventService;
 
 class EventDbRepository implements EventRepositoryContract
 {
@@ -40,16 +41,35 @@ class EventDbRepository implements EventRepositoryContract
     public function create(EventDto $eventDto): EventDto
     {
         $event = Event::create($eventDto->toModelEventArray());
-
-        return $this->mapToEventDto($event);
+        
+        if ($eventDto->getServiceIds()) {
+            foreach ($eventDto->getServiceIds() as $serviceId) {
+                EventService::create([
+                    'event_id' => $event->id,
+                    'service_id' => $serviceId
+                ]);
+            }
+        }
+        
+        return $this->mapToEventDto($event->fresh()->load('services'));
     }
 
     public function update(EventDto $eventDto): EventDto
     {
         $event = Event::findOrFail($eventDto->getId());
         $event->update($eventDto->toModelEventArray());
-
-        return $this->mapToEventDto($event);
+        
+        if ($eventDto->getServiceIds()) {
+            $event->services()->delete();
+            foreach ($eventDto->getServiceIds() as $serviceId) {
+                EventService::create([
+                    'event_id' => $event->id,
+                    'service_id' => $serviceId
+                ]);
+            }
+        }
+        
+        return $this->mapToEventDto($event->fresh()->load('services'));
     }
 
     public function delete(EventDto $eventDto): void
