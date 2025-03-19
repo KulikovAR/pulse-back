@@ -8,6 +8,7 @@ use App\Traits\HasEventTime;
 use App\Traits\Repeatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Event extends Model
 {
@@ -17,7 +18,6 @@ class Event extends Model
         'id',
         'client_id',
         'company_id',
-        'service_id',
         'description',
         'event_type',
         'event_time',
@@ -35,9 +35,9 @@ class Event extends Model
         return $this->belongsTo(Company::class);
     }
 
-    public function service(): BelongsTo
+    public function services(): BelongsToMany
     {
-        return $this->belongsTo(Service::class);
+        return $this->belongsToMany(Service::class, 'event_services')->withTimestamps();
     }
 
     public function repeats()

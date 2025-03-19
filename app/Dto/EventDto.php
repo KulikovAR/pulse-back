@@ -10,8 +10,8 @@ class EventDto
         private ?string $id = null,
         private ?string $clientId = null,
         private ?string $companyId = null,
-        private ?string $serviceId = null,
-        public ?object $service = null,
+        private ?array $serviceIds = [],
+        public ?array $services = [],
         private ?string $description = null,
         private ?string $eventType = null,
         private ?string $eventTime = null,
@@ -55,14 +55,14 @@ class EventDto
         return $this;
     }
 
-    public function getServiceId(): string
+    public function getServiceIds(): array
     {
-        return $this->serviceId;
+        return $this->serviceIds;
     }
 
-    public function setServiceId(string $serviceId): EventDto
+    public function setServiceIds(array $serviceIds): EventDto
     {
-        $this->serviceId = $serviceId;
+        $this->serviceIds = $serviceIds;
 
         return $this;
     }
@@ -127,14 +127,14 @@ class EventDto
         return $this;
     }
     
-    public function getService(): ?object
+    public function getServices(): ?array
     {
-        return $this->service;
+        return $this->services;
     }
 
-    public function setService(?object $service): self
+    public function setServices(?array $services): self
     {
-        $this->service = $service;
+        $this->services = $services;
         return $this;
     }
 
@@ -144,7 +144,7 @@ class EventDto
             'id' => $this->id,
             'client_id' => $this->clientId,
             'company_id' => $this->companyId,
-            'service_id' => $this->serviceId,
+            'service_ids' => $this->serviceIds,
             'description' => $this->description,
             'event_type' => $this->eventType,
             'event_time' => $this->eventTime,
@@ -159,8 +159,8 @@ class EventDto
             $event->id,
             $event->client_id,
             $event->company_id,
-            $event->service_id,
-            $event->service,
+            $event->services->pluck('id')->toArray(),
+            $event->services->toArray(),
             $event->description,
             $event->event_type,
             $event->event_time,
