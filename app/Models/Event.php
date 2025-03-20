@@ -9,6 +9,7 @@ use App\Traits\Repeatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\CompanyClient;
 
 class Event extends Model
 {
@@ -33,6 +34,12 @@ class Event extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function companyClient(): BelongsTo
+    {
+        return $this->belongsTo(CompanyClient::class, 'client_id', 'client_id')
+            ->where('company_id', $this->company_id);
     }
 
     public function services(): BelongsToMany

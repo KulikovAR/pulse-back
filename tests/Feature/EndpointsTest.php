@@ -673,6 +673,12 @@ class EndpointsTest extends TestCase
             'user_id' => $user->id,
         ]);
         $client = Client::factory()->create();
+
+        $companyClient = CompanyClient::factory()->create([
+            'client_id' => $client->id,
+            'company_id' => $company->id,
+            'name' => 'Test Client'
+        ]);
         
         // Create multiple services
         $services = Service::factory()->count(3)->create([
@@ -694,6 +700,8 @@ class EndpointsTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token
         ])->postJson('/api/v1/event', $eventData);
+
+        dd($response->json());
 
         $response->assertStatus(201)
                 ->assertJsonStructure([
