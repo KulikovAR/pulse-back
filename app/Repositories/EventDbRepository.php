@@ -12,28 +12,28 @@ class EventDbRepository implements EventRepositoryContract
 {
     public function list(): EventDtos
     {
-        $events = Event::all();
+        $events = Event::with('companyClient')->all();
 
         return $this->mapToEventDtos($events);
     }
 
     public function getByClientId(string $clientId): EventDtos
     {
-        $events = Event::where('client_id', $clientId)->get();
+        $events = Event::with('companyClient')->where('client_id', $clientId)->get();
 
         return $this->mapToEventDtos($events);
     }
 
     public function getByCompanyId(string $companyId): EventDtos
     {
-        $events = Event::where('company_id', $companyId)->get();
+        $events = Event::with('companyClient')->where('company_id', $companyId)->get();
 
         return $this->mapToEventDtos($events);
     }
 
     public function getById(string $id): EventDto
     {
-        $event = Event::findOrFail($id);
+        $event = Event::with('companyClient')->findOrFail($id);
 
         return $this->mapToEventDto($event);
     }

@@ -17,6 +17,7 @@ class EventDto
         private ?string $eventTime = null,
         private ?string $repeatType = null,
         private ?string $targetTime = null,
+        public ?array $companyClient = [],
     ) {}
 
     public function getId(): string
@@ -138,6 +139,17 @@ class EventDto
         return $this;
     }
 
+    public function getCompanyClient(): ?array
+    {
+        return $this->companyClient;
+    }
+
+    public function setCompanyClient(?array $companyClient): self
+    {
+        $this->companyClient = $companyClient;
+        return $this;
+    }
+
     public function toModelEventArray(): array
     {
         return [
@@ -165,7 +177,8 @@ class EventDto
             $event->event_type,
             $event->event_time,
             $event->repeat_type,
-            $event->target_time
+            $event->target_time,
+            $event->companyClient ? $event->companyClient->toArray() : [],
         );
     }
 
