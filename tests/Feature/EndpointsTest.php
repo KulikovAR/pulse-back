@@ -24,10 +24,18 @@ class EndpointsTest extends TestCase
             'user_id' => $user->id,
         ]);
         $anotherCompany = Company::factory()->create();
+
+        $client = Client::factory()->create();
+        $companyClient = CompanyClient::factory()->create([
+            'client_id' => $client->id,
+            'company_id' => $company->id,
+            'name' => 'Test GET'
+        ]);
         
         // Create events for the first company
         $events = Event::factory()->count(3)->create([
             'company_id' => $company->id,
+            'client_id' => $client->id,
         ]);
         
         // Create events for another company
@@ -701,7 +709,6 @@ class EndpointsTest extends TestCase
             'Authorization' => 'Bearer ' . $token
         ])->postJson('/api/v1/event', $eventData);
 
-        dd($response->json());
 
         $response->assertStatus(201)
                 ->assertJsonStructure([
