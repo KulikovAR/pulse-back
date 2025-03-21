@@ -108,6 +108,41 @@ class EndpointsTest extends TestCase
                 ]);
     }
 
+    public function test_can_get_events_by_id()
+    {
+        $company = Company::factory()->create();
+        $client = Client::factory()->create();
+
+        $event = Event::factory()->create([
+            'company_id' => $company->id,
+            'client_id' => $client->id,
+        ]);
+        
+        $token = $client->user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->getJson("/api/v1/event/{$event->id}");
+
+        $response->assertStatus(200)
+                ->assertJsonStructure([
+                    'data' => [
+                        'id',
+                        'description',
+                        'event_type',
+                        'event_time',
+                        'repeat_type'
+                    ]
+                ])
+                ->assertJson([
+                    'data' => [
+                        'id' => $event->id,
+                        'client_id' => $client->id,
+                        'company_id' => $company->id
+                    ]
+                ]);
+    }
+
     public function test_can_get_companies_by_client_id()
     {
         $client = Client::factory()->create();
