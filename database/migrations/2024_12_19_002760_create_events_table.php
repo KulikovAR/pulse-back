@@ -15,15 +15,16 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('client_id');
             $table->uuid('company_id');
-            $table->string('name');
             $table->string('description')->nullable();
             $table->string('event_type')->nullable();
             $table->timestamp('event_time');
-            $table->string('repeat_type')->nullable();
+            $table->string('repeat_type')->nullable(); 
+            $table->timestamp('target_time')->nullable(); 
             $table->timestamps();
 
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+
         });
     }
 

@@ -21,11 +21,12 @@ trait EventTrait
             id: $this->input('id'),
             clientId: $this->input('client_id'),
             companyId: $company->id,
-            name: $this->input('name'),
+            serviceIds: $this->input('service_ids'),
             description: $this->input('description'),
             eventType: $this->input('event_type'),
             eventTime: $this->input('event_time'),
             repeatType: $this->input('repeat_type'),
+            targetTime: $this->input('target_time'),
         );
     }
 }

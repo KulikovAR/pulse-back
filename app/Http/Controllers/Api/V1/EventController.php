@@ -42,6 +42,15 @@ class EventController extends Controller
     public function getEventById($id)
     {
         $event = $this->service->getEventById($id);
+        $user = Auth::user();
+
+        // Check if user has access to this event
+        if ($event->getClientId() !== $user->client->id) {
+            return new ApiJsonResponse(
+                message: 'You do not have permission to access this event.',
+                httpCode: 403
+            );
+        }
 
         return new ApiJsonResponse(data: new EventResource($event));
     }

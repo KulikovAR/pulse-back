@@ -24,10 +24,18 @@ class EndpointsTest extends TestCase
             'user_id' => $user->id,
         ]);
         $anotherCompany = Company::factory()->create();
+
+        $client = Client::factory()->create();
+        $companyClient = CompanyClient::factory()->create([
+            'client_id' => $client->id,
+            'company_id' => $company->id,
+            'name' => 'Test GET'
+        ]);
         
         // Create events for the first company
         $events = Event::factory()->count(3)->create([
             'company_id' => $company->id,
+            'client_id' => $client->id,
         ]);
         
         // Create events for another company
@@ -46,7 +54,6 @@ class EndpointsTest extends TestCase
                     'data' => [
                         '*' => [
                             'id',
-                            'name',
                             'description',
                             'event_type',
                             'event_time',
@@ -92,12 +99,46 @@ class EndpointsTest extends TestCase
                     'data' => [
                         '*' => [
                             'id',
-                            'name',
                             'description',
                             'event_type',
                             'event_time',
                             'repeat_type'
                         ]
+                    ]
+                ]);
+    }
+
+    public function test_can_get_events_by_id()
+    {
+        $company = Company::factory()->create();
+        $client = Client::factory()->create();
+
+        $event = Event::factory()->create([
+            'company_id' => $company->id,
+            'client_id' => $client->id,
+        ]);
+        
+        $token = $client->user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->getJson("/api/v1/event/{$event->id}");
+
+        $response->assertStatus(200)
+                ->assertJsonStructure([
+                    'data' => [
+                        'id',
+                        'description',
+                        'event_type',
+                        'event_time',
+                        'repeat_type'
+                    ]
+                ])
+                ->assertJson([
+                    'data' => [
+                        'id' => $event->id,
+                        'client_id' => $client->id,
+                        'company_id' => $company->id
                     ]
                 ]);
     }
@@ -676,14 +717,26 @@ class EndpointsTest extends TestCase
         ]);
         $client = Client::factory()->create();
 
+        $companyClient = CompanyClient::factory()->create([
+            'client_id' => $client->id,
+            'company_id' => $company->id,
+            'name' => 'Test Client'
+        ]);
+        
+        // Create multiple services
+        $services = Service::factory()->count(3)->create([
+            'company_id' => $company->id,
+            'name' => 'Test Service %d'
+        ]);
+
         $token = $user->createToken('test-token')->plainTextToken;
 
         $eventData = [
-            'name' => 'Test Event',
+            'service_ids' => $services->pluck('id')->toArray(),
             'description' => 'Test Event Description',
             'event_type' => 'meeting',
             'event_time' => now()->addDay()->format('Y-m-d H:i:s'),
-            'repeat_type' => 'daily',
+            'repeat_type' => 'weekly',
             'client_id' => $client->id
         ];
 
@@ -691,11 +744,18 @@ class EndpointsTest extends TestCase
             'Authorization' => 'Bearer ' . $token
         ])->postJson('/api/v1/event', $eventData);
 
+
         $response->assertStatus(201)
                 ->assertJsonStructure([
                     'data' => [
                         'id',
-                        'name',
+                        'services' => [
+                            '*' => [
+                                'id',
+                                'name',
+                                'company_id'
+                            ]
+                        ],
                         'description',
                         'event_type',
                         'event_time',
@@ -705,14 +765,36 @@ class EndpointsTest extends TestCase
                     ]
                 ]);
 
+        // Verify the response contains all services data
+        $responseData = $response->json('data');
+        $this->assertCount(3, $responseData['services']);
+        foreach ($services as $index => $service) {
+            $this->assertEquals($service->id, $responseData['services'][$index]['id']);
+            $this->assertEquals($service->name, $responseData['services'][$index]['name']);
+            $this->assertEquals($service->company_id, $responseData['services'][$index]['company_id']);
+        }
+
         $this->assertDatabaseHas('events', [
-            'name' => 'Test Event',
             'description' => 'Test Event Description',
             'event_type' => 'meeting',
-            'repeat_type' => 'daily',
+            'repeat_type' => 'weekly',
             'company_id' => $company->id,
             'client_id' => $client->id
         ]);
+
+        // Verify all event_services pivot records were created correctly
+        $event = Event::latest()->first();
+        foreach ($services as $service) {
+            $this->assertDatabaseHas('event_services', [
+                'event_id' => $event->id,
+                'service_id' => $service->id
+            ]);
+        }
+
+        // Verify all relationships are loaded correctly
+        foreach ($services as $service) {
+            $this->assertTrue($event->services->contains($service));
+        }
     }
 
     public function test_cannot_create_event_without_authentication()

@@ -23,6 +23,7 @@ trait CreatesUserWithClient
             'user_id' => $user->id,
             'username' => $clientData['username'],
             'name' => $clientData['name'] ?? 'User',
+            'phone' => $clientData['phone'] ?? null,
         ]);
 
         return ['user' => $user, 'client' => $client];

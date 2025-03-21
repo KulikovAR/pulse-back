@@ -10,11 +10,15 @@ class EventDto
         private ?string $id = null,
         private ?string $clientId = null,
         private ?string $companyId = null,
-        private ?string $name = null,
+        private ?array $serviceIds = [],
+        public ?array $services = [],
         private ?string $description = null,
         private ?string $eventType = null,
         private ?string $eventTime = null,
         private ?string $repeatType = null,
+        private ?string $targetTime = null,
+        public ?array $companyClient = [],
+        public ?array $company = [],
     ) {}
 
     public function getId(): string
@@ -53,14 +57,14 @@ class EventDto
         return $this;
     }
 
-    public function getName(): string
+    public function getServiceIds(): array
     {
-        return $this->name;
+        return $this->serviceIds;
     }
 
-    public function setName(string $name): EventDto
+    public function setServiceIds(array $serviceIds): EventDto
     {
-        $this->name = $name;
+        $this->serviceIds = $serviceIds;
 
         return $this;
     }
@@ -113,17 +117,63 @@ class EventDto
         return $this;
     }
 
+    public function getTargetTime(): ?string
+    {
+        return $this->targetTime;
+    }
+
+    public function setTargetTime(?string $targetTime): EventDto
+    {
+        $this->targetTime = $targetTime;
+
+        return $this;
+    }
+    
+    public function getServices(): ?array
+    {
+        return $this->services;
+    }
+
+    public function setServices(?array $services): self
+    {
+        $this->services = $services;
+        return $this;
+    }
+
+    public function getCompanyClient(): ?array
+    {
+        return $this->companyClient;
+    }
+
+    public function setCompanyClient(?array $companyClient): self
+    {
+        $this->companyClient = $companyClient;
+        return $this;
+    }
+
+    public function getCompany(): ?array
+    {
+        return $this->company;
+    }
+
+    public function setCompany(?array $company): self
+    {
+        $this->company = $company;
+        return $this;
+    }
+
     public function toModelEventArray(): array
     {
         return [
             'id' => $this->id,
             'client_id' => $this->clientId,
             'company_id' => $this->companyId,
-            'name' => $this->name,
+            'service_ids' => $this->serviceIds,
             'description' => $this->description,
             'event_type' => $this->eventType,
             'event_time' => $this->eventTime,
             'repeat_type' => $this->repeatType,
+            'target_time' => $this->targetTime,
         ];
     }
 
@@ -133,11 +183,16 @@ class EventDto
             $event->id,
             $event->client_id,
             $event->company_id,
-            $event->name,
+            $event->services->pluck('id')->toArray(),
+            $event->services->toArray(),
             $event->description,
             $event->event_type,
             $event->event_time,
             $event->repeat_type,
+            $event->target_time,
+            $event->companyClient ? $event->companyClient->toArray() : [],
+            $event->company ? $event->company->toArray() : [],
         );
     }
+
 }
