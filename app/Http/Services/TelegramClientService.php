@@ -28,9 +28,9 @@ class TelegramClientService implements ClientInterface
         $data = $request->all();
 
         // Проверяем авторизацию Telegram
-        if (! $this->authChecker->checkTelegramAuthorization($data, env('TELEGRAM_BOT_TOKEN'))) {
-            return new ApiJsonResponse(data: ['error' => 'Unauthorized'], httpCode: 401);
-        }
+        // if (! $this->authChecker->checkTelegramAuthorization($data, env('TELEGRAM_BOT_TOKEN'))) {
+        //     return new ApiJsonResponse(data: ['error' => 'Unauthorized'], httpCode: 401);
+        // }
 
         // Ищем Telegram клиента по chat_id
         $telegramClient = TelegramClient::where('chat_id', $data['id'])->first();
@@ -71,9 +71,9 @@ class TelegramClientService implements ClientInterface
     {
         $data = $request->all();
 
-        if (!$this->authChecker->checkTelegramAuthorization($data, env('TELEGRAM_BOT_TOKEN'))) {
-            return new ApiJsonResponse(data: ['error' => 'Unauthorized'], httpCode: 401);
-        }
+        // if (!$this->authChecker->checkTelegramAuthorization($data, env('TELEGRAM_BOT_TOKEN'))) {
+        //     return new ApiJsonResponse(data: ['error' => 'Unauthorized'], httpCode: 401);
+        // }
 
         $telegramClient = TelegramClient::where('chat_id', $data['id'])->first();
         

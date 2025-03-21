@@ -14,7 +14,7 @@ class TelegramClientLoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|numeric',
+            'id' => 'nullable|numeric',
             'first_name' => 'nullable|string',
             'username' => 'nullable|string',
             'phone' => 'nullable|string',
