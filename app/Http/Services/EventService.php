@@ -46,4 +46,9 @@ class EventService
     {
         $this->repository->delete($eventDto);
     }
+
+    public function cancelEvent(EventDto $eventDto): EventDto
+    {
+        return $this->repository->cancelEvent($eventDto);
+    }
 }

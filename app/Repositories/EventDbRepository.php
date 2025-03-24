@@ -78,6 +78,14 @@ class EventDbRepository implements EventRepositoryContract
         $event->delete();
     }
 
+    public function cancelEvent(EventDto $eventDto): EventDto
+    {
+        $event = Event::findOrFail($eventDto->getId());
+        $event->update(['is_cancelled' => true]);
+        
+        return $this->mapToEventDto($event->fresh()->load('services'));
+    }
+
     private function mapToEventDtos($events): EventDtos
     {
         return new EventDtos($events->map(fn ($event) => $this->mapToEventDto($event)));

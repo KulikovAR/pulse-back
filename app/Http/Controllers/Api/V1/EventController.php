@@ -94,9 +94,8 @@ class EventController extends Controller
             );
         }
 
-        // Only update the is_cancelled flag
         $event->setIsCancelled(true);
-        $updatedEvent = $this->service->updateEvent($event);
+        $updatedEvent = $this->service->cancelEvent($event);
 
         return new ApiJsonResponse(data: new EventResource($updatedEvent));
     }
