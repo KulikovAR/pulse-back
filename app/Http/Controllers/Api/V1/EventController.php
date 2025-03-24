@@ -80,4 +80,23 @@ class EventController extends Controller
 
         return new ApiJsonResponse(data: ['message' => 'Event deleted successfully.']);
     }
+
+    public function cancelEvent($id)
+    {
+        $event = $this->service->getEventById($id);
+        $user = Auth::user();
+
+        // Check if user has access to this event through client relationship
+        if ($event->getClientId() !== $user->client->id) {
+            return new ApiJsonResponse(
+                message: 'You do not have permission to cancel this event.',
+                httpCode: 403
+            );
+        }
+
+        $event->setIsCancelled(true);
+        $event = $this->service->updateEvent($event);
+
+        return new ApiJsonResponse(data: new EventResource($event));
+    }
 }

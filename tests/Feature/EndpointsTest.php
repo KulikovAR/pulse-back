@@ -814,4 +814,75 @@ class EndpointsTest extends TestCase
 
         $response->assertStatus(401);
     }
+
+    public function test_can_cancel_event()
+    {
+        $userCompany = User::factory()->create();
+        $company = Company::factory()->create([
+            'user_id' => $userCompany->id,
+        ]);
+
+        $user = User::factory()->create();
+        $client = Client::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        $event = Event::factory()->create([
+            'company_id' => $company->id,
+            'client_id' => $client->id,
+            'description' => 'canceled event',
+            'is_cancelled' => false
+        ]);
+
+        $token = $user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->putJson("/api/v1/event/{$event->id}/cancel");
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'is_cancelled' => true
+        ]);
+    }
+
+    public function test_cannot_cancel_event_of_another_client()
+    {
+        $userCompany = User::factory()->create();
+        $company = Company::factory()->create([
+            'user_id' => $userCompany->id,
+        ]);
+
+        $user = User::factory()->create();
+        $client = Client::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        $anotherUser = User::factory()->create();
+        $anotherСlient = Client::factory()->create([
+            'user_id' => $anotherUser->id,
+        ]);
+
+        $event = Event::factory()->create([
+            'company_id' => $company->id,
+            'client_id' => $client->id,
+            'description' => 'event to cancel',
+            'is_cancelled' => false
+        ]);
+
+        $token = $anotherUser->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->putJson("/api/v1/event/{$event->id}/cancel");
+
+        $response->assertStatus(403);
+
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'is_cancelled' => false
+        ]);
+    }
 }
