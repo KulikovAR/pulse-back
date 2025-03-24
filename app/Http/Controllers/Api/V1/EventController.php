@@ -94,9 +94,22 @@ class EventController extends Controller
             );
         }
 
-        $event->setIsCancelled(true);
-        $event = $this->service->updateEvent($event);
+        // Create new EventDto with all existing data
+        $eventDto = new EventDto(
+            id: $event->getId(),
+            clientId: $event->getClientId(),
+            companyId: $event->getCompanyId(),
+            serviceIds: $event->getServiceIds(),
+            description: $event->getDescription(),
+            eventType: $event->getEventType(),
+            eventTime: $event->getEventTime(),
+            repeatType: $event->getRepeatType(),
+            targetTime: $event->getTargetTime(),
+            isCancelled: true
+        );
 
-        return new ApiJsonResponse(data: new EventResource($event));
+        $updatedEvent = $this->service->updateEvent($eventDto);
+
+        return new ApiJsonResponse(data: new EventResource($updatedEvent));
     }
 }
