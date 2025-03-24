@@ -7,6 +7,7 @@ use App\Dto\EventDto;
 use App\Dto\EventDtos;
 use App\Models\Event;
 use App\Models\EventService;
+use Illuminate\Support\Facades\DB;
 
 class EventDbRepository implements EventRepositoryContract
 {
@@ -81,9 +82,20 @@ class EventDbRepository implements EventRepositoryContract
     public function cancelEvent(EventDto $eventDto): EventDto
     {
         $event = Event::findOrFail($eventDto->getId());
-        $event->update(['is_cancelled' => true]);
         
-        return $this->mapToEventDto($event->fresh()->load('services'));
+        // Получаем оригинальное время как строку в формате БД
+        $rawEventTime = $event->getRawOriginal('event_time');
+        
+        // Обновляем через DB facade для обхода преобразований Eloquent
+        DB::table('events')
+            ->where('id', $event->id)
+            ->update([
+                'is_cancelled' => true,
+                'event_time' => $rawEventTime,
+                'updated_at' => now() // Обновляем только это поле
+            ]);
+        
+        return $this->mapToEventDto($event->refresh()->load('services'));
     }
 
     private function mapToEventDtos($events): EventDtos
