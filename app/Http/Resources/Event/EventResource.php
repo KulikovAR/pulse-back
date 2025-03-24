@@ -23,6 +23,7 @@ class EventResource extends JsonResource
             'event_time' => $this->getEventTime(),
             'repeat_type' => $this->getRepeatType(),
             'target_time' => $this->getTargetTime(),
+            'is_cancelled' => $this->getIsCancelled(),
         ];
     }
 }

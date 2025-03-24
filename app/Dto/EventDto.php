@@ -19,6 +19,7 @@ class EventDto
         private ?string $targetTime = null,
         public ?array $companyClient = [],
         public ?array $company = [],
+        private bool $isCancelled = false
     ) {}
 
     public function getId(): string
@@ -162,6 +163,17 @@ class EventDto
         return $this;
     }
 
+    public function getIsCancelled(): bool
+    {
+        return $this->isCancelled;
+    }
+
+    public function setIsCancelled(bool $isCancelled): self
+    {
+        $this->isCancelled = $isCancelled;
+        return $this;
+    }
+
     public function toModelEventArray(): array
     {
         return [
@@ -174,6 +186,7 @@ class EventDto
             'event_time' => $this->eventTime,
             'repeat_type' => $this->repeatType,
             'target_time' => $this->targetTime,
+            'is_cancelled' => $this->isCancelled,
         ];
     }
 
@@ -192,6 +205,7 @@ class EventDto
             $event->target_time,
             $event->companyClient ? $event->companyClient->toArray() : [],
             $event->company ? $event->company->toArray() : [],
+            $event->is_cancelled ?? false
         );
     }
 

@@ -23,7 +23,8 @@ class Event extends Model
         'event_type',
         'event_time',
         'repeat_type',
-        'target_time'
+        'target_time',
+        'is_cancelled'
     ];
 
     public function client(): BelongsTo

@@ -743,7 +743,7 @@ class EndpointsTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token
         ])->postJson('/api/v1/event', $eventData);
-
+        
 
         $response->assertStatus(201)
                 ->assertJsonStructure([
