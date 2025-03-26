@@ -158,6 +158,17 @@ class TelegramClientService implements ClientInterface
 
     private function handleClientByPhone(array $data): ApiJsonResponse
     {
+        // Clean phone number to contain only digits
+        $cleanPhone = preg_replace('/[^0-9]/', '', $data['phone']);
+        if (empty($cleanPhone)) {
+            return new ApiJsonResponse(
+                data: ['error' => 'invalid_phone'],
+                message: 'Phone number must contain numeric characters',
+                httpCode: 400
+            );
+        }
+        $data['phone'] = $cleanPhone;
+
         $client = Client::where('phone', $data['phone'])->first();
 
         if (! $client) {
