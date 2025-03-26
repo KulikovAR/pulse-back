@@ -23,56 +23,31 @@ class TelegramClientService implements ClientInterface
         $this->authChecker = $authChecker;
     }
 
-    private function validateTelegramAuth(array $data): ?ApiJsonResponse
-    {
-        if (!$this->authChecker->checkTelegramAuthorization($data, env('TELEGRAM_BOT_TOKEN'))) {
-            return new ApiJsonResponse(data: ['error' => 'Unauthorized'], httpCode: 401);
-        }
-        return null;
-    }
-
-    private function handleTelegramClientWithUser(TelegramClient $telegramClient): ApiJsonResponse
-    {
-        $client = $telegramClient->client;
-        
-        if (!$client->user_id) {
-            $user = $this->createNewUser($telegramClient->toArray());
-            $client->update(['user_id' => $user->id]);
-        }
-        
-        return $this->handleExistingTelegramClient($telegramClient);
-    }
-
-    private function handlePhoneNotProvided(): ApiJsonResponse
-    {
-        return new ApiJsonResponse(
-            data: ['error' => 'phone_required'],
-            message: 'Please share your phone number through Telegram bot',
-            httpCode: 400
-        );
-    }
-
     public function login(Request $request): ApiJsonResponse
     {
         $data = $request->all();
 
-        // Validate Telegram authorization
-        if ($authError = $this->validateTelegramAuth($data)) {
-            return $authError;
-        }
+        // Проверяем авторизацию Telegram
+        // if (! $this->authChecker->checkTelegramAuthorization($data, env('TELEGRAM_BOT_TOKEN'))) {
+        //     return new ApiJsonResponse(data: ['error' => 'Unauthorized'], httpCode: 401);
+        // }
 
-        // Find Telegram client by chat_id
+        // Ищем Telegram клиента по chat_id
         $telegramClient = TelegramClient::where('chat_id', $data['id'])->first();
         if ($telegramClient) {
-            return $this->handleTelegramClientWithUser($telegramClient);
+            return $this->handleExistingTelegramClient($telegramClient);
         }
 
-        // Handle phone number if provided
+        // Если передан phone
         if (isset($data['phone'])) {
             return $this->handleClientByPhone($data);
         }
 
-        return $this->handlePhoneNotProvided();
+        // Если phone не указан
+        return $this->createUserClientAndTelegramClient($data, [
+            'username' => $data['username'],
+            'name' => $data['first_name'] ?? 'User',
+        ]);
     }
 
     private function createCompanyForUser(User $user): void
@@ -92,23 +67,44 @@ class TelegramClientService implements ClientInterface
         })->first();
     }
 
-    private function handleAdminTelegramClient(TelegramClient $telegramClient): ApiJsonResponse
+    public function adminLogin(Request $request): ApiJsonResponse
     {
-        $client = $telegramClient->client;
-        
-        if (!$client->user_id) {
-            $user = $this->createNewUser($telegramClient->toArray());
-            $client->update(['user_id' => $user->id]);
-            $this->createCompanyForUser($user);
-        } else {
-            $this->createCompanyForUser($client->user);
-        }
-        
-        return $this->handleExistingTelegramClient($telegramClient);
-    }
+        $data = $request->all();
 
-    private function handleAdminPhoneResponse(ApiJsonResponse $response): ApiJsonResponse
-    {
+        // if (!$this->authChecker->checkTelegramAuthorization($data, env('TELEGRAM_BOT_TOKEN'))) {
+        //     return new ApiJsonResponse(data: ['error' => 'Unauthorized'], httpCode: 401);
+        // }
+
+        $telegramClient = TelegramClient::where('chat_id', $data['id'])->first();
+        
+        if ($telegramClient) {
+            $response = $this->handleExistingTelegramClient($telegramClient);
+            
+            if ($response->httpCode === 200) {
+                $this->createCompanyForUser($telegramClient->client->user);
+            }
+            
+            return $response;
+        }
+
+        if (isset($data['phone'])) {
+            $response = $this->handleClientByPhone($data);
+            
+            if ($response->httpCode === 200) {
+                $user = $this->getUserFromToken($response->data['token']);
+                if ($user) {
+                    $this->createCompanyForUser($user);
+                }
+            }
+            
+            return $response;
+        }
+
+        $response = $this->createUserClientAndTelegramClient($data, [
+            'username' => $data['username'],
+            'name' => $data['first_name'] ?? 'User',
+        ]);
+        
         if ($response->httpCode === 200) {
             $user = $this->getUserFromToken($response->data['token']);
             if ($user) {
@@ -117,28 +113,6 @@ class TelegramClientService implements ClientInterface
         }
         
         return $response;
-    }
-
-    public function adminLogin(Request $request): ApiJsonResponse
-    {
-        $data = $request->all();
-
-        if ($authError = $this->validateTelegramAuth($data)) {
-            return $authError;
-        }
-
-        $telegramClient = TelegramClient::where('chat_id', $data['id'])->first();
-        
-        if ($telegramClient) {
-            return $this->handleAdminTelegramClient($telegramClient);
-        }
-
-        if (isset($data['phone'])) {
-            $response = $this->handleClientByPhone($data);
-            return $this->handleAdminPhoneResponse($response);
-        }
-
-        return $this->handlePhoneNotProvided();
     }
 
     private function handleExistingTelegramClient(TelegramClient $telegramClient): ApiJsonResponse
