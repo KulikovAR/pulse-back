@@ -23,9 +23,19 @@ class TelegramClientService implements ClientInterface
         $this->authChecker = $authChecker;
     }
 
-    private function validateTelegramAuth(array $data): ?ApiJsonResponse
+    // private function validateTelegramAuth(array $data): ?ApiJsonResponse
+    // {
+    //     if (!$this->authChecker->checkTelegramAuthorization($data, env('TELEGRAM_BOT_TOKEN'))) {
+    //         return new ApiJsonResponse(data: ['error' => 'Unauthorized'], httpCode: 401);
+    //     }
+    //     return null;
+    // }
+    private function validateTelegramAuth(string $initData): ?ApiJsonResponse
     {
-        if (!$this->authChecker->checkTelegramAuthorization($data, env('TELEGRAM_BOT_TOKEN'))) {
+        if (!$this->authChecker->checkTelegramAuthorization(
+            $initData,
+            env('TELEGRAM_BOT_TOKEN')
+        )) {
             return new ApiJsonResponse(data: ['error' => 'Unauthorized'], httpCode: 401);
         }
         return null;
@@ -55,12 +65,13 @@ class TelegramClientService implements ClientInterface
     public function login(Request $request): ApiJsonResponse
     {
         $data = $request->all();
-
+        $telegramInitData = $request->header('X-Telegram-InitData');
+    
         // Validate Telegram authorization
-        if ($authError = $this->validateTelegramAuth($data)) {
+        if ($authError = $this->validateTelegramAuth($telegramInitData)) {
             return $authError;
         }
-
+    
         // Find Telegram client by chat_id
         $telegramClient = TelegramClient::where('chat_id', $data['id'])->first();
         if ($telegramClient) {
@@ -123,9 +134,9 @@ class TelegramClientService implements ClientInterface
     {
         $data = $request->all();
 
-        if ($authError = $this->validateTelegramAuth($data)) {
-            return $authError;
-        }
+        // if ($authError = $this->validateTelegramAuth($data)) {
+        //     return $authError;
+        // }
 
         $telegramClient = TelegramClient::where('chat_id', $data['id'])->first();
         
