@@ -133,10 +133,12 @@ class TelegramClientService implements ClientInterface
     public function adminLogin(Request $request): ApiJsonResponse
     {
         $data = $request->all();
-
-        // if ($authError = $this->validateTelegramAuth($data)) {
-        //     return $authError;
-        // }
+        $telegramInitData = $request->header('X-Telegram-InitData');
+    
+        // Validate Telegram authorization
+        if ($authError = $this->validateTelegramAuth($telegramInitData)) {
+            return $authError;
+        }
 
         $telegramClient = TelegramClient::where('chat_id', $data['id'])->first();
         
