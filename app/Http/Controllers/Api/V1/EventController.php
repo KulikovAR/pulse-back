@@ -9,18 +9,19 @@ use App\Http\Resources\Event\EventCollection;
 use App\Http\Resources\Event\EventResource;
 use App\Http\Responses\ApiJsonResponse;
 use App\Http\Services\EventService;
+use App\Http\Services\TelegramService;
 use App\Repositories\EventDbRepository;
 use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
     private EventService $service;
+    private TelegramService $telegramService;
 
     public function __construct()
     {
-        $this->service = new EventService(
-            new EventDbRepository
-        );
+        $this->service = new EventService(new EventDbRepository);
+        $this->telegramService = new TelegramService();
     }
 
     public function getEventsByClientId()
@@ -58,9 +59,12 @@ class EventController extends Controller
     public function createEvent(EventRequest $request)
     {
         $eventDto = $request->toEventDto();
-        $event = $this->service->createEvent($eventDto);
-
-        return new ApiJsonResponse(data: new EventResource($event), httpCode: 201);
+        $createdEventDto = $this->service->createEvent($eventDto);
+        
+        // Send notification with DTO
+        $this->telegramService->sendNewEventNotification($createdEventDto);
+    
+        return new ApiJsonResponse(data: new EventResource($createdEventDto), httpCode: 201);
     }
 
     public function updateEvent(EventRequest $request, $id)
