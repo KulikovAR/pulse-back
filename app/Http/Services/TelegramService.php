@@ -18,7 +18,7 @@ class TelegramService
             
             $this->sendMessage(
                 $telegramClient->chat_id,
-                "<b>🆕 Новая запись!</b>\nКомпания: {$eventDto->getCompany()['name']}\nУслуги: "
+                "<b>🆕 Новая запись!</b>\n\nКомпания: {$eventDto->getCompany()['name']}\nУслуги: "
                 . implode(', ', array_column($eventDto->getServices(), 'name')) 
                 . "\n\nДата: " . $eventTime->format('d.m.Y')
                 . "\nВремя: " . $eventTime->format('H:i') . " (МСК, UTC+3)"
