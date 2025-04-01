@@ -13,13 +13,16 @@ class TelegramService
         $client = Client::find($eventDto->getClientId());
         
         if ($client && $telegramClient = TelegramClient::where('client_id', $client->id)->first()) {
+            $eventTime = new \DateTime($eventDto->getEventTime(), new \DateTimeZone('UTC'));
+            $eventTime->setTimezone(new \DateTimeZone('Europe/Moscow'));
+            
             $this->sendMessage(
                 $telegramClient->chat_id,
                 "🆕 Новая запись!\nКомпания: {$eventDto->getCompany()['name']}\nУслуги: "
                 . implode(', ', array_column($eventDto->getServices(), 'name')) 
-                . "\nДата: " . date('d.m.Y', strtotime($eventDto->getEventTime()))
-                . "\nВремя: " . date('H:i', strtotime($eventDto->getEventTime()))
-                . "\nАдрес: {$eventDto->getCompany()['address']}"
+                . "\n\nДата: " . $eventTime->format('d.m.Y')
+                . "\nВремя: " . $eventTime->format('H:i') . " (МСК, UTC+3)"
+                . "\n\nАдрес: {$eventDto->getCompany()['address']}"
             );
         }
     }
