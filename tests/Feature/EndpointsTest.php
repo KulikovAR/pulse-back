@@ -881,6 +881,71 @@ class EndpointsTest extends TestCase
         $this->assertEquals($initialState, $updatedState);
     }
 
+    public function test_company_can_cancel_event()
+    {
+        $userCompany = User::factory()->create();
+        $company = Company::factory()->create([
+            'user_id' => $userCompany->id,
+        ]);
+
+        $user = User::factory()->create();
+        $client = Client::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        $event = Event::factory()->create([
+            'company_id' => $company->id,
+            'client_id' => $client->id,
+            'description' => 'canceled event',
+            'is_cancelled' => false
+        ]);
+
+        // Create three services for the company
+        $services = Service::factory()->count(3)->create([
+            'company_id' => $company->id,
+        ]);
+
+        // Create event services with different services
+        $eventServices = [];
+        foreach ($services as $service) {
+            $eventServices[] = EventService::factory()->create([
+                'event_id' => $event->id,
+                'service_id' => $service->id
+            ]);
+        }
+
+        // Get initial event state
+        $initialEvent = Event::with('services')->find($event->id);
+        $initialState = $initialEvent->toArray();
+        print_r('Initial Event State:');
+        print_r($initialState);
+
+        $token = $userCompany->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->putJson("/api/v1/event/{$event->id}/cancel");
+
+        $response->assertStatus(200);
+
+        // Get and show the updated event
+        $updatedEvent = Event::with('services')->find($event->id);
+        $updatedState = $updatedEvent->toArray();
+        print_r('\nUpdated Event State:');
+        print_r($updatedState);
+
+        // Assert only is_cancelled field changed
+        $this->assertTrue($initialEvent->is_cancelled == 0);
+        $this->assertTrue($updatedEvent->is_cancelled == 1);
+
+        // Remove is_cancelled from both states for comparison
+        unset($initialState['is_cancelled']);
+        unset($updatedState['is_cancelled']);
+
+        // Assert all other fields remain unchanged
+        $this->assertEquals($initialState, $updatedState);
+    }
+
     public function test_cannot_cancel_event_of_another_client()
     {
         $userCompany = User::factory()->create();

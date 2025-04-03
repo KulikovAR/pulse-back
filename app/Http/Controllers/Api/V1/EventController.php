@@ -89,18 +89,29 @@ class EventController extends Controller
     {
         $event = $this->service->getEventById($id);
         $user = Auth::user();
-
-        // Check if user has access to this event through client relationship
-        if ($event->getClientId() !== $user->client->id) {
+    
+        // Проверки прав доступа
+        $isClient = $user->client && $event->getClientId() === $user->client->id;
+        $isCompanyOwner = isset($event->getCompany()['user_id']) 
+            && $event->getCompany()['user_id'] === $user->id;
+    
+        if (!$isClient && !$isCompanyOwner) {
             return new ApiJsonResponse(
                 message: 'You do not have permission to cancel this event.',
                 httpCode: 403
             );
         }
-
+    
         $event->setIsCancelled(true);
         $updatedEvent = $this->service->cancelEvent($event);
-
+    
+        // Отправка уведомлений
+        if ($isClient) {
+            $this->telegramService->sendEventCancelledByClientNotification($updatedEvent);
+        } elseif ($isCompanyOwner) {
+            $this->telegramService->sendEventCancelledByCompanyNotification($updatedEvent);
+        }
+    
         return new ApiJsonResponse(data: new EventResource($updatedEvent));
     }
 }
