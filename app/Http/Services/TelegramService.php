@@ -41,7 +41,10 @@ class TelegramService
     {
         $company = $eventDto->getCompany();
         $client = Client::find($eventDto->getClientId());
-        $companyClient = CompanyClient::find($eventDto->getClientId());
+        $companyClient = CompanyClient::where([
+            'company_id' => $company['id'],
+            'client_id' => $client->id
+        ])->first();
         
         if ($client && isset($company['user_id'])) {
             $companyOwnerClient = Client::where('user_id', $company['user_id'])->first();
