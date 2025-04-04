@@ -84,4 +84,32 @@ class TelegramService
             );
         }
     }
+
+    public function sendEventConfirmedByClientNotification($eventDto): void
+    {
+        $company = $eventDto->getCompany();
+        $client = Client::find($eventDto->getClientId());
+        $companyClient = CompanyClient::where([
+            'company_id' => $company['id'],
+            'client_id' => $client->id
+        ])->first();
+        
+        if ($client && isset($company['user_id'])) {
+            $companyOwnerClient = Client::where('user_id', $company['user_id'])->first();
+            
+            if ($companyOwnerClient && $telegramClient = TelegramClient::where('client_id', $companyOwnerClient->id)->first()) {
+                $eventTime = new \DateTime($eventDto->getEventTime(), new \DateTimeZone('UTC'));
+                $eventTime->setTimezone(new \DateTimeZone('Europe/Moscow'));
+                
+                $this->sendMessage(
+                    $telegramClient->chat_id,
+                    "<b>✅ Запись подтверждена клиентом</b>\n\n"
+                    . "Клиент: {$companyClient->name}\n"
+                    . "Услуги: " . implode(', ', array_column($eventDto->getServices(), 'name')) . "\n\n"
+                    . "Дата: " . $eventTime->format('d.m.Y') . "\n"
+                    . "Время: " . $eventTime->format('H:i') . " (МСК, UTC+3)"
+                );
+            }
+        }
+    }
 }

@@ -114,4 +114,38 @@ class EventController extends Controller
     
         return new ApiJsonResponse(data: new EventResource($updatedEvent));
     }
+
+    public function confirmEvent($id)
+    {
+        $event = $this->service->getEventById($id);
+        $user = Auth::user();
+    
+        // Проверки прав доступа
+        $isClient = $user->client && $event->getClientId() === $user->client->id;
+    
+        if (!$isClient) {
+            return new ApiJsonResponse(
+                message: 'You do not have permission to confirm this event.',
+                httpCode: 403
+            );
+        }
+
+        // Check if event is already cancelled
+        if ($event->getStatus() === 'cancelled') {
+            return new ApiJsonResponse(
+                message: 'Cannot confirm a cancelled event.',
+                httpCode: 409
+            );
+        }
+    
+        $event->setStatus('confirmed');
+        $updatedEvent = $this->service->confirmEvent($event);
+    
+        // Отправка уведомлений
+        if ($isClient) {
+            $this->telegramService->sendEventConfirmedByClientNotification($updatedEvent);
+        }
+    
+        return new ApiJsonResponse(data: new EventResource($updatedEvent));
+    }
 }

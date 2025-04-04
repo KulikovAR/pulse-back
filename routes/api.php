@@ -76,5 +76,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [EventController::class, 'updateEvent']);
         Route::delete('/{id}', [EventController::class, 'deleteEvent']);
         Route::put('/{id}/cancel', [EventController::class, 'cancelEvent']);
+        Route::put('/{id}/confirm', [EventController::class, 'confirmEvent']);
     });
 });

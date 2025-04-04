@@ -98,6 +98,25 @@ class EventDbRepository implements EventRepositoryContract
         return $this->mapToEventDto($event->refresh()->load('services'));
     }
 
+    public function confirmEvent(EventDto $eventDto): EventDto
+    {
+        $event = Event::findOrFail($eventDto->getId());
+        
+        // Получаем оригинальное время как строку в формате БД
+        $rawEventTime = $event->getRawOriginal('event_time');
+        
+        // Обновляем через DB facade для обхода преобразований Eloquent
+        DB::table('events')
+            ->where('id', $event->id)
+            ->update([
+                'status' => 'confirmed',
+                'event_time' => $rawEventTime,
+                'updated_at' => now() // Обновляем только это поле
+            ]);
+        
+        return $this->mapToEventDto($event->refresh()->load('services'));
+    }
+
     private function mapToEventDtos($events): EventDtos
     {
         return new EventDtos($events->map(fn ($event) => $this->mapToEventDto($event)));

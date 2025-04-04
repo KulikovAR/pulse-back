@@ -51,4 +51,9 @@ class EventService
     {
         return $this->repository->cancelEvent($eventDto);
     }
+
+    public function confirmEvent(EventDto $eventDto): EventDto
+    {
+        return $this->repository->confirmEvent($eventDto);
+    }
 }

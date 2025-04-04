@@ -983,4 +983,135 @@ class EndpointsTest extends TestCase
             'status' => 'unread'
         ]);
     }
+
+    public function test_can_confirm_event()
+    {
+        $userCompany = User::factory()->create();
+        $company = Company::factory()->create([
+            'user_id' => $userCompany->id,
+        ]);
+
+        $user = User::factory()->create();
+        $client = Client::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        $event = Event::factory()->create([
+            'company_id' => $company->id,
+            'client_id' => $client->id,
+            'description' => 'canceled event',
+            'status' => 'unread'
+        ]);
+
+        // Create three services for the company
+        $services = Service::factory()->count(3)->create([
+            'company_id' => $company->id,
+        ]);
+
+        // Create event services with different services
+        $eventServices = [];
+        foreach ($services as $service) {
+            $eventServices[] = EventService::factory()->create([
+                'event_id' => $event->id,
+                'service_id' => $service->id
+            ]);
+        }
+
+        // Get initial event state
+        $initialEvent = Event::with('services')->find($event->id);
+        $initialState = $initialEvent->toArray();
+        print_r('Initial Event State:');
+        print_r($initialState);
+
+        $token = $user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->putJson("/api/v1/event/{$event->id}/confirm");
+
+        $response->assertStatus(200);
+
+        // Get and show the updated event
+        $updatedEvent = Event::with('services')->find($event->id);
+        $updatedState = $updatedEvent->toArray();
+        print_r('\nUpdated Event State:');
+        print_r($updatedState);
+
+        // Assert only status field changed
+        $this->assertTrue($initialEvent->status === 'unread');
+        $this->assertTrue($updatedEvent->status === 'confirmed');
+
+        // Remove status from both states for comparison
+        unset($initialState['status']);
+        unset($updatedState['status']);
+
+        // Assert all other fields remain unchanged
+        $this->assertEquals($initialState, $updatedState);
+    }
+
+    public function test_cannot_confirm_cancelled_event()
+    {
+        $userCompany = User::factory()->create();
+        $company = Company::factory()->create([
+            'user_id' => $userCompany->id,
+        ]);
+
+        $user = User::factory()->create();
+        $client = Client::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        $event = Event::factory()->create([
+            'company_id' => $company->id,
+            'client_id' => $client->id,
+            'description' => 'canceled event',
+            'status' => 'cancelled'
+        ]);
+
+        // Create three services for the company
+        $services = Service::factory()->count(3)->create([
+            'company_id' => $company->id,
+        ]);
+
+        // Create event services with different services
+        $eventServices = [];
+        foreach ($services as $service) {
+            $eventServices[] = EventService::factory()->create([
+                'event_id' => $event->id,
+                'service_id' => $service->id
+            ]);
+        }
+
+        // Get initial event state
+        $initialEvent = Event::with('services')->find($event->id);
+        $initialState = $initialEvent->toArray();
+        print_r('Initial Event State:');
+        print_r($initialState);
+
+        $token = $user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->putJson("/api/v1/event/{$event->id}/confirm");
+
+        $response->assertStatus(409);
+
+        // Get and show the updated event
+        $updatedEvent = Event::with('services')->find($event->id);
+        $updatedState = $updatedEvent->toArray();
+        print_r('\nUpdated Event State:');
+        print_r($updatedState);
+
+        // Assert only status field changed
+        $this->assertTrue($initialEvent->status === 'cancelled');
+        $this->assertTrue($updatedEvent->status === 'cancelled');
+
+        // Remove status from both states for comparison
+        unset($initialState['status']);
+        unset($updatedState['status']);
+
+        // Assert all other fields remain unchanged
+        $this->assertEquals($initialState, $updatedState);
+    }
+
 }
