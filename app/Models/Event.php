@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\CompanyClient;
+use App\Enums\EventStatusEnum;
 
 class Event extends Model
 {
@@ -24,7 +25,7 @@ class Event extends Model
         'event_time',
         'repeat_type',
         'target_time',
-        'is_cancelled'
+        'status'
     ];
 
     public function client(): BelongsTo
@@ -46,6 +47,21 @@ class Event extends Model
     public function services(): BelongsToMany
     {
         return $this->belongsToMany(Service::class, 'event_services')->withTimestamps();
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === EventStatusEnum::CANCELLED;
+    }
+
+    public function isConfirmed(): bool
+    {
+        return $this->status === EventStatusEnum::CONFIRMED;
+    }
+
+    public function isUnread(): bool
+    {
+        return $this->status === EventStatusEnum::UNREAD;
     }
 
     public function repeats()

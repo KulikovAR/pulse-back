@@ -90,7 +90,7 @@ class EventDbRepository implements EventRepositoryContract
         DB::table('events')
             ->where('id', $event->id)
             ->update([
-                'is_cancelled' => true,
+                'status' => 'cancelled',
                 'event_time' => $rawEventTime,
                 'updated_at' => now() // Обновляем только это поле
             ]);

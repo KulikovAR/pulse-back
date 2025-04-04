@@ -832,7 +832,7 @@ class EndpointsTest extends TestCase
             'company_id' => $company->id,
             'client_id' => $client->id,
             'description' => 'canceled event',
-            'is_cancelled' => false
+            'status' => 'unread'
         ]);
 
         // Create three services for the company
@@ -869,13 +869,13 @@ class EndpointsTest extends TestCase
         print_r('\nUpdated Event State:');
         print_r($updatedState);
 
-        // Assert only is_cancelled field changed
-        $this->assertTrue($initialEvent->is_cancelled == 0);
-        $this->assertTrue($updatedEvent->is_cancelled == 1);
+        // Assert only status field changed
+        $this->assertTrue($initialEvent->status === 'unread');
+        $this->assertTrue($updatedEvent->status === 'cancelled');
 
-        // Remove is_cancelled from both states for comparison
-        unset($initialState['is_cancelled']);
-        unset($updatedState['is_cancelled']);
+        // Remove status from both states for comparison
+        unset($initialState['status']);
+        unset($updatedState['status']);
 
         // Assert all other fields remain unchanged
         $this->assertEquals($initialState, $updatedState);
@@ -897,7 +897,7 @@ class EndpointsTest extends TestCase
             'company_id' => $company->id,
             'client_id' => $client->id,
             'description' => 'canceled event',
-            'is_cancelled' => false
+            'status' => 'unread'
         ]);
 
         // Create three services for the company
@@ -934,13 +934,13 @@ class EndpointsTest extends TestCase
         print_r('\nUpdated Event State:');
         print_r($updatedState);
 
-        // Assert only is_cancelled field changed
-        $this->assertTrue($initialEvent->is_cancelled == 0);
-        $this->assertTrue($updatedEvent->is_cancelled == 1);
+        // Assert only status field changed
+        $this->assertTrue($initialEvent->status === 'unread');
+        $this->assertTrue($updatedEvent->status === 'cancelled');
 
-        // Remove is_cancelled from both states for comparison
-        unset($initialState['is_cancelled']);
-        unset($updatedState['is_cancelled']);
+        // Remove status from both states for comparison
+        unset($initialState['status']);
+        unset($updatedState['status']);
 
         // Assert all other fields remain unchanged
         $this->assertEquals($initialState, $updatedState);
@@ -967,7 +967,7 @@ class EndpointsTest extends TestCase
             'company_id' => $company->id,
             'client_id' => $client->id,
             'description' => 'event to cancel',
-            'is_cancelled' => false
+            'status' => 'unread'
         ]);
 
         $token = $anotherUser->createToken('test-token')->plainTextToken;
@@ -980,7 +980,7 @@ class EndpointsTest extends TestCase
 
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
-            'is_cancelled' => false
+            'status' => 'unread'
         ]);
     }
 }

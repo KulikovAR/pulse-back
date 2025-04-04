@@ -102,7 +102,7 @@ class EventController extends Controller
             );
         }
     
-        $event->setIsCancelled(true);
+        $event->setStatus('cancelled');
         $updatedEvent = $this->service->cancelEvent($event);
     
         // Отправка уведомлений

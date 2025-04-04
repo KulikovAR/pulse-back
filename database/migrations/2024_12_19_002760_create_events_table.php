@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('event_time');
             $table->string('repeat_type')->nullable(); 
             $table->timestamp('target_time')->nullable(); 
-            $table->boolean('is_cancelled')->default(false);
+            $table->string('status')->default('unread');
             $table->timestamps();
 
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
