@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\CompanyClient;
+use App\Models\TelegramClient;
 use App\Enums\EventStatusEnum;
 
 class Event extends Model
@@ -31,6 +32,11 @@ class Event extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function telegramClient(): BelongsTo
+    {
+        return $this->belongsTo(TelegramClient::class, 'client_id', 'client_id');
     }
 
     public function company(): BelongsTo

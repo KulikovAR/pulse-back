@@ -19,7 +19,10 @@ class EventDto
         private ?string $targetTime = null,
         public ?array $companyClient = [],
         public ?array $company = [],
-        private ?string $status = 'unread'
+        private ?string $status = 'unread',
+        public ?array $client = [],
+        public ?array $telegramClient = [],
+        public ?array $repeats = [],
     ) {}
 
     public function getId(): string
@@ -180,6 +183,39 @@ class EventDto
         return $this->status === 'cancelled';
     }
 
+    public function getClient(): ?array
+    {
+        return $this->client;
+    }
+
+    public function setClient(?array $client): self
+    {
+        $this->client = $client;
+        return $this;
+    }
+
+    public function getTelegramClient(): ?array
+    {
+        return $this->telegramClient;
+    }
+
+    public function setTelegramClient(?array $telegramClient): self
+    {
+        $this->telegramClient = $telegramClient;
+        return $this;
+    }
+
+    public function getRepeats(): ?array
+    {
+        return $this->repeats;
+    }
+
+    public function setRepeats(?array $repeats): self
+    {
+        $this->repeats = $repeats;
+        return $this;
+    }
+
     public function toModelEventArray(): array
     {
         return [
@@ -211,7 +247,10 @@ class EventDto
             $event->target_time,
             $event->companyClient ? $event->companyClient->toArray() : [],
             $event->company ? $event->company->toArray() : [],
-            $event->status
+            $event->status,
+            $event->client ? $event->client->toArray() : [],
+            $event->telegramClient ? $event->telegramClient->toArray() : [],
+            $event->repeats->toArray(),
         );
     }
 

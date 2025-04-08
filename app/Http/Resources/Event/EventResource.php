@@ -24,6 +24,9 @@ class EventResource extends JsonResource
             'repeat_type' => $this->getRepeatType(),
             'target_time' => $this->getTargetTime(),
             'status' => $this->getStatus(),
+            'client' => $this->client,
+            'telegram_client' => $this->telegramClient,
+            'repeats' => $this->repeats,
         ];
     }
 }
