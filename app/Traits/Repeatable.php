@@ -43,9 +43,9 @@ trait Repeatable
         $time = Carbon::parse($this->event_time);
 
         return match($this->repeat_type) {
-            'WEEKLY' => $time->addWeek(),
-            'BIWEEKLY' => $time->addWeeks(2),
-            'MONTHLY' => $time->addMonth(),
+            'weekly' => $time->addWeek(),
+            'biweekly' => $time->addWeeks(2),
+            'monthly' => $time->addMonth(),
             default => $time
         };
     }

@@ -20,7 +20,7 @@ class EventScheduleService
         foreach ($events as $event) {
             $this->sendNotification($event);
             
-            if ($event->repeat_type || $event->target_time) {
+            if (($event->repeat_type || $event->target_time) && $event->status !== 'cancelled') {
                 $event->createNewRepeat();
             }
         }
@@ -34,7 +34,7 @@ class EventScheduleService
             $this->sendNotification($repeat->event);
             $repeat->delete();
             
-            if ($repeat->event->repeat_type) {
+            if ($repeat->event->repeat_type && $repeat->event->status !== 'cancelled') {
                 $repeat->event->createNewRepeat();
             }
         }
