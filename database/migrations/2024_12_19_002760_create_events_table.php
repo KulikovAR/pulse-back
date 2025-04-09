@@ -22,6 +22,7 @@ return new class extends Migration
             $table->timestamp('target_time')->nullable(); 
             $table->string('status')->default('unread');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');

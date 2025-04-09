@@ -56,4 +56,14 @@ class EventService
     {
         return $this->repository->confirmEvent($eventDto);
     }
+
+    public function forceDelete(EventDto $eventDto): void
+    {
+        $this->repository->forceDelete($eventDto->getId());
+    }
+
+    public function softDelete(EventDto $eventDto): void
+    {
+        $this->repository->softDelete($eventDto->getId());
+    }
 }

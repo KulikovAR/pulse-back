@@ -76,14 +76,14 @@ class EventController extends Controller
         return new ApiJsonResponse(data: new EventResource($event));
     }
 
-    public function deleteEvent($id)
-    {
-        $eventDto = new EventDto;
-        $eventDto->setId($id);
-        $this->service->deleteEvent($eventDto);
+    // public function deleteEvent($id)
+    // {
+    //     $eventDto = new EventDto;
+    //     $eventDto->setId($id);
+    //     $this->service->deleteEvent($eventDto);
 
-        return new ApiJsonResponse(data: ['message' => 'Event deleted successfully.']);
-    }
+    //     return new ApiJsonResponse(data: ['message' => 'Event deleted successfully.']);
+    // }
 
     public function cancelEvent($id)
     {
@@ -147,5 +147,35 @@ class EventController extends Controller
         }
     
         return new ApiJsonResponse(data: new EventResource($updatedEvent));
+    }
+
+    public function deleteEvent($id)
+    {
+        $event = $this->service->getEventById($id);
+        $user = Auth::user();
+    
+        // Проверки прав доступа
+        $isClient = $user->client && $event->getClientId() === $user->client->id;
+        $isCompanyOwner = isset($event->getCompany()['user_id']) 
+            && $event->getCompany()['user_id'] === $user->id;
+    
+        if (!$isClient && !$isCompanyOwner) {
+            return new ApiJsonResponse(
+                message: 'You do not have permission to delete this event.',
+                httpCode: 403
+            );
+        }
+    
+        $eventDto = new EventDto;
+        $eventDto->setId($id);
+        
+        // Different deletion logic based on who deletes
+        if ($isCompanyOwner) {
+            $this->service->forceDelete($eventDto);
+        } else {
+            $this->service->softDelete($eventDto);
+        }
+
+        return new ApiJsonResponse(data: ['message' => 'Event deleted successfully.']);
     }
 }

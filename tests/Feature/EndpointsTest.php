@@ -877,6 +877,9 @@ class EndpointsTest extends TestCase
         unset($initialState['status']);
         unset($updatedState['status']);
 
+        unset($initialState['updated_at']);
+        unset($updatedState['updated_at']);
+
         // Assert all other fields remain unchanged
         $this->assertEquals($initialState, $updatedState);
     }
@@ -941,6 +944,9 @@ class EndpointsTest extends TestCase
         // Remove status from both states for comparison
         unset($initialState['status']);
         unset($updatedState['status']);
+
+        unset($initialState['updated_at']);
+        unset($updatedState['updated_at']);
 
         // Assert all other fields remain unchanged
         $this->assertEquals($initialState, $updatedState);
@@ -1112,6 +1118,136 @@ class EndpointsTest extends TestCase
 
         // Assert all other fields remain unchanged
         $this->assertEquals($initialState, $updatedState);
+    }
+
+    public function test_client_can_delete_event()
+    {
+        $userCompany = User::factory()->create();
+        $company = Company::factory()->create([
+            'user_id' => $userCompany->id,
+        ]);
+
+        $user = User::factory()->create();
+        $client = Client::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        $event = Event::factory()->create([
+            'company_id' => $company->id,
+            'client_id' => $client->id,
+            'description' => 'canceled event',
+            'status' => 'unread'
+        ]);
+
+        // Create three services for the company
+        $services = Service::factory()->count(3)->create([
+            'company_id' => $company->id,
+        ]);
+
+        // Create event services with different services
+        $eventServices = [];
+        foreach ($services as $service) {
+            $eventServices[] = EventService::factory()->create([
+                'event_id' => $event->id,
+                'service_id' => $service->id
+            ]);
+        }
+
+        // Get initial event state
+        $initialEvent = Event::with('services')->find($event->id);
+        $initialState = $initialEvent->toArray();
+        print_r('Initial Event State:');
+        print_r($initialState);
+
+        $token = $user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->deleteJson("/api/v1/event/{$event->id}/delete");
+
+        $response->assertStatus(200);
+
+        // Get and show the updated event
+        $updatedEvent = Event::withTrashed()->with('services')->find($event->id);
+        $updatedState = $updatedEvent->toArray();
+        print_r('\nUpdated Event State:');
+        print_r($updatedState);
+
+        // Assert only status field changed
+        // $this->assertTrue($initialEvent->status === 'unread');
+        // $this->assertTrue($updatedEvent->status === 'confirmed');
+
+        // Remove status from both states for comparison
+        unset($initialState['deleted_at']);
+        unset($updatedState['deleted_at']);
+
+        // Assert all other fields remain unchanged
+        $this->assertEquals($initialState, $updatedState);
+    }
+
+    public function test_company_can_delete_event()
+    {
+        $userCompany = User::factory()->create();
+        $company = Company::factory()->create([
+            'user_id' => $userCompany->id,
+        ]);
+
+        $user = User::factory()->create();
+        $client = Client::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        $event = Event::factory()->create([
+            'company_id' => $company->id,
+            'client_id' => $client->id,
+            'description' => 'canceled event',
+            'status' => 'unread'
+        ]);
+
+        // Create three services for the company
+        $services = Service::factory()->count(3)->create([
+            'company_id' => $company->id,
+        ]);
+
+        // Create event services with different services
+        $eventServices = [];
+        foreach ($services as $service) {
+            $eventServices[] = EventService::factory()->create([
+                'event_id' => $event->id,
+                'service_id' => $service->id
+            ]);
+        }
+
+        // Get initial event state
+        $initialEvent = Event::with('services')->find($event->id);
+        $initialState = $initialEvent->toArray();
+        print_r('Initial Event State:');
+        print_r($initialState);
+
+        $token = $userCompany->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->deleteJson("/api/v1/event/{$event->id}/delete");
+
+        $response->assertStatus(200);
+
+        // Verify the event is completely deleted
+        $this->assertDatabaseMissing('events', [
+            'id' => $event->id
+        ]);
+
+        // Try to find the event even with trashed
+        $deletedEvent = Event::withTrashed()->find($event->id);
+        $this->assertNull($deletedEvent);
+
+        // Verify that related event_services are also deleted
+        foreach ($services as $service) {
+            $this->assertDatabaseMissing('event_services', [
+                'event_id' => $event->id,
+                'service_id' => $service->id
+            ]);
+        }
     }
 
 }

@@ -12,10 +12,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\CompanyClient;
 use App\Models\TelegramClient;
 use App\Enums\EventStatusEnum;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use HasFactory, HasUuids, HasEventTime, Repeatable;
+    use HasFactory, HasUuids, HasEventTime, Repeatable, SoftDeletes;
 
     protected $fillable = [
         'id',

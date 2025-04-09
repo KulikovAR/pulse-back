@@ -27,7 +27,7 @@ class EventDbRepository implements EventRepositoryContract
 
     public function getByCompanyId(string $companyId): EventDtos
     {
-        $events = Event::where('company_id', $companyId)->get();
+        $events = Event::withTrashed()->where('company_id', $companyId)->get();
 
         return $this->mapToEventDtos($events);
     }
@@ -77,6 +77,25 @@ class EventDbRepository implements EventRepositoryContract
     {
         $event = Event::findOrFail($eventDto->getId());
         $event->delete();
+    }
+
+    public function forceDelete(string $id): void
+    {
+        $event = Event::findOrFail($id);
+        $event->forceDelete();
+    }
+
+    public function softDelete(string $id): void
+    {
+        $event = Event::findOrFail($id);
+        $rawEventTime = $event->getRawOriginal('event_time');
+        $event->delete(); // Laravel's delete() is soft by default when model uses SoftDeletes
+        DB::table('events')
+            ->where('id', $event->id)
+            ->update([
+                'event_time' => $rawEventTime,
+                'updated_at' => now() // Обновляем только это поле
+            ]);
     }
 
     public function cancelEvent(EventDto $eventDto): EventDto
