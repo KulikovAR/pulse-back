@@ -181,4 +181,23 @@ class TelegramService
             );
         }
     }
+
+    public function sendDailySchedule($client, $events): void
+    {
+        if ($telegramClient = TelegramClient::where('client_id', $client->id)->first()) {
+            $message = "<b>📅 Ваши записи на сегодня:</b>\n\n";
+            
+            foreach ($events as $event) {
+                $eventTime = new \DateTime($event['event_time'], new \DateTimeZone('UTC'));
+                $eventTime->setTimezone(new \DateTimeZone('Europe/Moscow'));
+                
+                $message .= "🕐 " . $eventTime->format('H:i') . "\n"
+                    . "📍 {$event['company']['name']}\n"
+                    . "✨ Услуги: " . implode(', ', array_column($event['services'], 'name')) . "\n"
+                    . "📌 Адрес: {$event['company']['address']}\n\n";
+            }
+            
+            $this->sendMessage($telegramClient->chat_id, $message);
+        }
+    }
 }

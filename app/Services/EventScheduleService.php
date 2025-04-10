@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\EventRepeat;
 use App\Http\Services\TelegramService;
 use App\Dto\EventDto;
+use App\Models\Client;
 
 class EventScheduleService
 {
@@ -18,6 +19,62 @@ class EventScheduleService
         $this->processMainEvents();
         $this->processRepeatEvents();
         $this->processReminders();
+        $this->processDailySchedule();
+    }
+
+    protected function processDailySchedule()
+    {
+        $mskTime = now()->setTimezone('Europe/Moscow');
+        if ($mskTime->format('H:i') !== '09:00') {
+            return;
+        }
+
+        $clients = Client::all();
+        
+        foreach ($clients as $client) {
+            $events = Event::where('client_id', $client->id)
+                ->where('event_time', '>=', now()->startOfDay())
+                ->where('event_time', '<=', now()->endOfDay())
+                ->where('status', '!=', 'cancelled')
+                ->get();
+
+            $repeats = EventRepeat::where('event_time', '>=', now()->startOfDay())
+                ->where('event_time', '<=', now()->endOfDay())
+                ->whereHas('event', function($query) use ($client) {
+                    $query->where('client_id', $client->id)
+                          ->where('status', '!=', 'cancelled');
+                })
+                ->get();
+
+            $todayEvents = [];
+            
+            foreach ($events as $event) {
+                $eventDto = EventDto::makeFromModelEvent($event);
+                $todayEvents[] = [
+                    'event_time' => $eventDto->getEventTime(),
+                    'company' => $eventDto->getCompany(),
+                    'services' => $eventDto->getServices()
+                ];
+            }
+
+            foreach ($repeats as $repeat) {
+                $eventDto = EventDto::makeFromModelEvent($repeat->event);
+                $eventDto->setEventTime($repeat->event_time);
+                $todayEvents[] = [
+                    'event_time' => $eventDto->getEventTime(),
+                    'company' => $eventDto->getCompany(),
+                    'services' => $eventDto->getServices()
+                ];
+            }
+
+            usort($todayEvents, function($a, $b) {
+                return strcmp($a['event_time'], $b['event_time']);
+            });
+
+            if (!empty($todayEvents)) {
+                $this->telegramService->sendDailySchedule($client, $todayEvents);
+            }
+        }
     }
 
     protected function processReminders()
