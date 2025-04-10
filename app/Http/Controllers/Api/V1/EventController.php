@@ -47,7 +47,11 @@ class EventController extends Controller
         $user = Auth::user();
 
         // Check if user has access to this event
-        if ($event->getClientId() !== $user->client->id) {
+        $isClient = $user->client && $event->getClientId() === $user->client->id;
+        $isCompanyOwner = isset($event->getCompany()['user_id']) 
+            && $event->getCompany()['user_id'] === $user->id;
+        
+        if (!$isClient && !$isCompanyOwner) {
             return new ApiJsonResponse(
                 message: 'You do not have permission to access this event.',
                 httpCode: 403

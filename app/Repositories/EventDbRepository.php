@@ -34,7 +34,7 @@ class EventDbRepository implements EventRepositoryContract
 
     public function getById(string $id): EventDto
     {
-        $event = Event::findOrFail($id);
+        $event = Event::withTrashed()->findOrFail($id);
 
         return $this->mapToEventDto($event); 
     }

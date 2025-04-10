@@ -28,12 +28,18 @@ class TelegramService
         }
     }
 
+    private function getAppLink(): string
+    {
+        return "\n\n<a href='https://t.me/PulseAppBot_bot/app'>Перейти в приложение</a>";
+    }
+
     public function sendMessage(int $chatId, string $message): void
     {
         Http::post("https://api.telegram.org/bot".env('TELEGRAM_BOT_TOKEN')."/sendMessage", [
             'chat_id' => $chatId,
-            'text' => $message,
-            'parse_mode' => 'HTML'
+            'text' => $message . $this->getAppLink(),
+            'parse_mode' => 'HTML',
+            'disable_web_page_preview' => true
         ]);
     }
 
