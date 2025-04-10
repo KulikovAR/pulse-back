@@ -12,6 +12,7 @@ use App\Http\Services\EventService;
 use App\Http\Services\TelegramService;
 use App\Repositories\EventDbRepository;
 use Illuminate\Support\Facades\Auth;
+use App\Models\EventRepeat;
 
 class EventController extends Controller
 {
@@ -89,29 +90,35 @@ class EventController extends Controller
     {
         $event = $this->service->getEventById($id);
         $user = Auth::user();
-    
+        
         // Проверки прав доступа
         $isClient = $user->client && $event->getClientId() === $user->client->id;
         $isCompanyOwner = isset($event->getCompany()['user_id']) 
             && $event->getCompany()['user_id'] === $user->id;
-    
+        
         if (!$isClient && !$isCompanyOwner) {
             return new ApiJsonResponse(
                 message: 'You do not have permission to cancel this event.',
                 httpCode: 403
             );
         }
-    
+        
         $event->setStatus('cancelled');
         $updatedEvent = $this->service->cancelEvent($event);
-    
+        
+        // Check if this is a repeat event and update time accordingly
+        $repeat = EventRepeat::where('event_id', $id)->first();
+        if ($repeat) {
+            $updatedEvent->setEventTime($repeat->event_time);
+        }
+        
         // Отправка уведомлений
         if ($isClient) {
             $this->telegramService->sendEventCancelledByClientNotification($updatedEvent);
         } elseif ($isCompanyOwner) {
             $this->telegramService->sendEventCancelledByCompanyNotification($updatedEvent);
         }
-    
+        
         return new ApiJsonResponse(data: new EventResource($updatedEvent));
     }
 
@@ -119,10 +126,10 @@ class EventController extends Controller
     {
         $event = $this->service->getEventById($id);
         $user = Auth::user();
-    
+        
         // Проверки прав доступа
         $isClient = $user->client && $event->getClientId() === $user->client->id;
-    
+        
         if (!$isClient) {
             return new ApiJsonResponse(
                 message: 'You do not have permission to confirm this event.',
@@ -137,15 +144,21 @@ class EventController extends Controller
                 httpCode: 409
             );
         }
-    
+        
         $event->setStatus('confirmed');
         $updatedEvent = $this->service->confirmEvent($event);
-    
+        
+        // Check if this is a repeat event and update time accordingly
+        $repeat = EventRepeat::where('event_id', $id)->first();
+        if ($repeat) {
+            $updatedEvent->setEventTime($repeat->event_time);
+        }
+        
         // Отправка уведомлений
         if ($isClient) {
             $this->telegramService->sendEventConfirmedByClientNotification($updatedEvent);
         }
-    
+        
         return new ApiJsonResponse(data: new EventResource($updatedEvent));
     }
 
