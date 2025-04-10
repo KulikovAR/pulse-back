@@ -4,9 +4,15 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\EventRepeat;
+use App\Http\Services\TelegramService;
+use App\Dto\EventDto;
 
 class EventScheduleService
 {
+    public function __construct(
+        private TelegramService $telegramService
+    ) {}
+
     public function processEvents()
     {
         $this->processMainEvents();
@@ -21,7 +27,8 @@ class EventScheduleService
             $this->sendNotification($event);
             
             if (($event->repeat_type || $event->target_time) && $event->status !== 'cancelled') {
-                $event->createNewRepeat();
+                $newEvent = $event->createNewRepeat();
+                $this->telegramService->sendEventRepeatNotification(EventDto::makeFromModelEvent($newEvent));
             }
         }
     }
@@ -35,7 +42,8 @@ class EventScheduleService
             $repeat->delete();
             
             if ($repeat->event->repeat_type && $repeat->event->status !== 'cancelled') {
-                $repeat->event->createNewRepeat();
+                $newEvent = $repeat->event->createNewRepeat();
+                $this->telegramService->sendEventRepeatNotification(EventDto::makeFromModelEvent($newEvent));
             }
         }
     }

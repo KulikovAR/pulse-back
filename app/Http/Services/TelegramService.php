@@ -112,4 +112,33 @@ class TelegramService
             }
         }
     }
+
+    public function sendEventRepeatNotification($eventDto): void
+    {
+        $client = Client::find($eventDto->getClientId());
+        
+        if ($client && $telegramClient = TelegramClient::where('client_id', $client->id)->first()) {
+            $eventTime = new \DateTime($eventDto->getEventTime(), new \DateTimeZone('UTC'));
+            $eventTime->setTimezone(new \DateTimeZone('Europe/Moscow'));
+            
+            // Формируем текст о типе повторения
+            $repeatText = match($eventDto->getRepeatType()) {
+                'weekly' => 'еженедельно',
+                'biweekly' => 'раз в две недели',
+                'monthly' => 'ежемесячно',
+                default => 'разово'
+            };
+            
+            $this->sendMessage(
+                $telegramClient->chat_id,
+                "<b>🔄 Создано повторение записи</b>\n\n"
+                . "Компания: {$eventDto->getCompany()['name']}\n"
+                . "Услуги: " . implode(', ', array_column($eventDto->getServices(), 'name')) . "\n\n"
+                . "Дата: " . $eventTime->format('d.m.Y') . "\n"
+                . "Время: " . $eventTime->format('H:i') . " (МСК, UTC+3)\n\n"
+                . "Тип повторения: " . $repeatText . "\n"
+                . "Адрес: {$eventDto->getCompany()['address']}"
+            );
+        }
+    }
 }
