@@ -68,9 +68,9 @@ class TelegramClientService implements ClientInterface
         $telegramInitData = $request->header('X-Telegram-InitData');
     
         // Validate Telegram authorization
-        // if ($authError = $this->validateTelegramAuth($telegramInitData)) {
-        //     return $authError;
-        // }
+        if ($authError = $this->validateTelegramAuth($telegramInitData)) {
+            return $authError;
+        }
     
         // Find Telegram client by chat_id
         $telegramClient = TelegramClient::where('chat_id', $data['id'])->first();
@@ -136,9 +136,9 @@ class TelegramClientService implements ClientInterface
         $telegramInitData = $request->header('X-Telegram-InitData');
     
         // Validate Telegram authorization
-        // if ($authError = $this->validateTelegramAuth($telegramInitData)) {
-        //     return $authError;
-        // }
+        if ($authError = $this->validateTelegramAuth($telegramInitData)) {
+            return $authError;
+        }
 
         $telegramClient = TelegramClient::where('chat_id', $data['id'])->first();
         

@@ -36,7 +36,7 @@ class EventDbRepository implements EventRepositoryContract
     {
         $event = Event::findOrFail($id);
 
-        return $this->mapToEventDto($event);
+        return $this->mapToEventDto($event); 
     }
 
     public function create(EventDto $eventDto): EventDto
