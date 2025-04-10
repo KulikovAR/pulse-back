@@ -27,8 +27,11 @@ class EventScheduleService
             $this->sendNotification($event);
             
             if (($event->repeat_type || $event->target_time) && $event->status !== 'cancelled') {
-                $newEvent = $event->createNewRepeat();
-                $this->telegramService->sendEventRepeatNotification(EventDto::makeFromModelEvent($newEvent));
+                $newRepeat = $event->createNewRepeat();
+                // Создаем DTO из оригинального события, но с датой из повторения
+                $eventDto = EventDto::makeFromModelEvent($event);
+                $eventDto->setEventTime($newRepeat->event_time);
+                $this->telegramService->sendEventRepeatNotification($eventDto);
             }
         }
     }
@@ -42,8 +45,11 @@ class EventScheduleService
             $repeat->delete();
             
             if ($repeat->event->repeat_type && $repeat->event->status !== 'cancelled') {
-                $newEvent = $repeat->event->createNewRepeat();
-                $this->telegramService->sendEventRepeatNotification(EventDto::makeFromModelEvent($newEvent));
+                $newRepeat = $repeat->event->createNewRepeat();
+                // То же самое для повторений
+                $eventDto = EventDto::makeFromModelEvent($repeat->event);
+                $eventDto->setEventTime($newRepeat->event_time);
+                $this->telegramService->sendEventRepeatNotification($eventDto);
             }
         }
     }
