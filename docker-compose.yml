@@ -7,19 +7,19 @@ services:
         uid: 1000
       context: ./
       dockerfile: Dockerfile
-    image: example
-    container_name: example-app
+    image: pusle-back
+    container_name: pusle-back-app
     restart: unless-stopped
     working_dir: /var/www/
     volumes:
       - ./:/var/www
     networks:
-      - example
+      - pusle-back
 
   db:
     platform: linux/x86_64 #macOS
     image: mysql:5.7
-    container_name: example-db
+    container_name: pusle-back-db
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: ${DB_DATABASE}
@@ -31,11 +31,11 @@ services:
     volumes:
       - ./docker-compose/mysql:/docker-entrypoint-initdb.d
     networks:
-      - example
+      - pusle-back
 
   nginx:
     image: nginx:alpine
-    container_name: example-nginx
+    container_name: pusle-back-nginx
     restart: unless-stopped
     ports:
       - 8000:80
@@ -43,18 +43,12 @@ services:
       - ./:/var/www
       - ./docker-compose/nginx:/etc/nginx/conf.d/
     networks:
-      - example
+      - pusle-back
     environment:
       - VIRTUAL_HOST=${EXAMPLE_HOSTNAME}
       - LETSENCRYPT_HOST=${EXAMPLE_HOSTNAME}
       - LETSENCRYPT_EMAIL=${EXAMPLE_EMAIL}
 
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8080:8080
-
 networks:
-  example:
+  pusle-back:
     driver: bridge

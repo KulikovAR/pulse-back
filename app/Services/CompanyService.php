@@ -6,8 +6,8 @@ use App\Http\Resources\CompanyResource;
 use App\Models\Company;
 use App\Models\User;
 use App\Http\Responses\ApiJsonResponse;
-use Illuminate\Http\Resources\Json\ResourceCollection;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class CompanyService
 {
@@ -37,8 +37,22 @@ class CompanyService
         if ($company->user_id !== $user->id) {
             abort(403, 'Unauthorized action.');
         }
+
+        if (isset($validated['image']) && $validated['image'] instanceof UploadedFile) {
+            $validated['image'] = $this->handleImageUpload($validated['image'], $company->image);
+        }
+
         $company->update($validated);
         return (new CompanyResource($company))->response()->getData()->data;
+    }
+
+    private function handleImageUpload(UploadedFile $image, ?string $oldImagePath = null): string
+    {
+        if ($oldImagePath && Storage::disk('public')->exists($oldImagePath)) {
+            Storage::disk('public')->delete($oldImagePath);
+        }
+
+        return $image->store('companies', 'public');
     }
 
     public function destroy(Company $company, User $user): ApiJsonResponse
