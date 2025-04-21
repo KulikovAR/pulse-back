@@ -10,7 +10,7 @@ class TelescopeAuthorization
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (app()->environment('local')) {
+        if (in_array(app()->environment(), ['local', 'develop'])) {
             return $next($request);
         }
 
