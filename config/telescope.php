@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'enabled' => env('TELESCOPE_ENABLED', true),
+    'enabled' => in_array(env('APP_ENV'), ['local', 'develop']),
 
     /*
     |--------------------------------------------------------------------------
