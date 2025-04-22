@@ -49,10 +49,12 @@ class CompanyService
     public function handleImageUpload(Company $company, UploadedFile $image): string
     {
         if (Storage::disk('public')->exists($company->image)) {
-            Storage::disk('public')->delete($oldImagePath);
+            Storage::disk('public')->delete($company->image);
         }
 
         $company->image = $image->store('companies', 'public');
+
+        $company->save();
     }
 
     public function destroy(Company $company, User $user): ApiJsonResponse
