@@ -52,7 +52,7 @@ class CompanyService
             Storage::disk('public')->delete($company->image);
         }
 
-        $company->image = $image->store('companies', 'public');
+        $company->image = $image->store('companies';
 
         $company->save();
     }
