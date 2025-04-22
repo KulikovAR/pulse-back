@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Event;
 
+use App\Http\Resources\CompanyResource;
 use App\Http\Resources\ServiceResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -13,7 +14,7 @@ class EventResource extends JsonResource
         return [
             'id' => $this->getId(),
             'company_client' => $this->companyClient,
-            'company' => $this->company,
+            'company' => new CompanyResource($this->company),
             'client_id' => $this->getClientId(),
             'company_id' => $this->getCompanyId(),
             'service_ids' => $this->getServiceIds(),
