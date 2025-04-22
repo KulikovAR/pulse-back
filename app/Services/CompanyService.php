@@ -46,7 +46,7 @@ class CompanyService
         return (new CompanyResource($company))->response()->getData()->data;
     }
 
-    public function handleImageUpload(Company $company, UploadedFile $image): string
+    public function handleImageUpload(Company $company, UploadedFile $image): void
     {
         if ($company->image && Storage::disk('public')->exists($company->image)) {
             Storage::disk('public')->delete($company->image);
