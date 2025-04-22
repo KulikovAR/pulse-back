@@ -48,7 +48,7 @@ class CompanyService
 
     public function handleImageUpload(Company $company, UploadedFile $image): string
     {
-        if (Storage::disk('public')->exists($company->image)) {
+        if ($company->image && Storage::disk('public')->exists($company->image)) {
             Storage::disk('public')->delete($company->image);
         }
 
