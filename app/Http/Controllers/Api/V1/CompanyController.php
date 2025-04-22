@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Company\ImageCompanyRequest;
 use App\Http\Requests\Company\StoreCompanyRequest;
 use App\Http\Requests\Company\UpdateCompanyRequest;
 use App\Http\Responses\ApiJsonResponse;
@@ -30,6 +31,15 @@ class CompanyController extends Controller
 
     public function show(Company $company): ApiJsonResponse
     {
+        return new ApiJsonResponse(data: $this->service->show($company, Auth::user()));
+    }
+
+    public function image(ImageCompanyRequest $request, Company $company): ApiJsonResponse
+    {
+        if ($request->hasFile('image')) {
+            $this->service->handleImageUpload($company, $request->file('image'));
+        }
+
         return new ApiJsonResponse(data: $this->service->show($company, Auth::user()));
     }
 
