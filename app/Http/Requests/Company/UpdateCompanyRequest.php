@@ -12,7 +12,7 @@ class UpdateCompanyRequest extends FormRequest
             'user_id'     => 'sometimes|required|uuid|exists:users,id',
             'name'        => 'sometimes|required|string|max:255',
             'description' => 'sometimes|required|string',
-            'image'       => 'nullable',
+            'image'       => 'nullable|file|image|mimes:jpeg,png,jpg,gif|max:2048',
             'category'    => 'sometimes|required|string|max:255',
             'address'     => 'sometimes|required|string|max:255',
         ];
