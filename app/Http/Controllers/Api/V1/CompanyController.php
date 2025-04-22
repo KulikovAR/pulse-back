@@ -35,8 +35,8 @@ class CompanyController extends Controller
 
     public function update(UpdateCompanyRequest $request, Company $company): ApiJsonResponse
     {
-        if ($request->has('image')) {
-            $this->service->handleImageUpload($company, $request->image);
+        if ($request->hasFile('image')) {
+            $this->service->handleImageUpload($company, $request->file('image'));
         }
 
         return new ApiJsonResponse(data: $this->service->update($company, $request->validated(), Auth::user()));
