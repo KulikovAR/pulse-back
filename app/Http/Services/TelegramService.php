@@ -35,7 +35,7 @@ class TelegramService
                 [
                     [
                         'text' => '📱 Открыть приложение',
-                        'url' => 'https://t.me/PulseAppBot_bot/app'
+                        'url' => 'https://t.me/NapomnyuApp_Bot/client'
                     ]
                 ]
             ]
