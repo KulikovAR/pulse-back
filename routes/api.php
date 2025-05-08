@@ -1,12 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\V1\ClientController;
+use App\Http\Controllers\Api\V1\CompanyController;
 use App\Http\Controllers\Api\V1\EventController;
+use App\Http\Controllers\Api\V1\ServiceController;
 use App\Http\Controllers\Api\V1\TelegramController;
 use App\Http\Controllers\AssetsController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Api\V1\ServiceController;
-use App\Http\Controllers\Api\V1\CompanyController;
-use App\Http\Controllers\Api\V1\ClientController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -49,6 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('companies')->group(function () {
+        Route::post('/image/{company}', [CompanyController::class, 'image'])->name('companies.image');
+
         Route::get('/', [CompanyController::class, 'index'])->name('companies.index');
         Route::post('/', [CompanyController::class, 'store'])->name('companies.store');
         Route::get('/client', [CompanyController::class, 'getByClientId'])->name('companies.by-client');
@@ -74,6 +76,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [EventController::class, 'getEventById']);
         Route::post('', [EventController::class, 'createEvent']);
         Route::put('/{id}', [EventController::class, 'updateEvent']);
-        Route::delete('/{id}', [EventController::class, 'deleteEvent']);
+        Route::put('/{id}/cancel', [EventController::class, 'cancelEvent']);
+        Route::put('/{id}/confirm', [EventController::class, 'confirmEvent']);
+        Route::delete('/{id}/delete', [EventController::class, 'deleteEvent']);
     });
 });

@@ -3,20 +3,21 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Company\ImageCompanyRequest;
 use App\Http\Requests\Company\StoreCompanyRequest;
 use App\Http\Requests\Company\UpdateCompanyRequest;
-use App\Http\Resources\CompanyResource;
+use App\Http\Responses\ApiJsonResponse;
 use App\Models\Company;
 use App\Services\CompanyService;
-use App\Http\Responses\ApiJsonResponse;
-use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
     public function __construct(
         protected CompanyService $service
-    ) {}
+    )
+    {
+    }
 
     public function index(): ApiJsonResponse
     {
@@ -33,8 +34,21 @@ class CompanyController extends Controller
         return new ApiJsonResponse(data: $this->service->show($company, Auth::user()));
     }
 
+    public function image(ImageCompanyRequest $request, Company $company): ApiJsonResponse
+    {
+        if ($request->hasFile('image')) {
+            $this->service->handleImageUpload($company, $request->file('image'));
+        }
+
+        return new ApiJsonResponse(data: $this->service->show($company, Auth::user()));
+    }
+
     public function update(UpdateCompanyRequest $request, Company $company): ApiJsonResponse
     {
+        if ($request->hasFile('image')) {
+            $this->service->handleImageUpload($company, $request->file('image'));
+        }
+
         return new ApiJsonResponse(data: $this->service->update($company, $request->validated(), Auth::user()));
     }
 
@@ -46,6 +60,7 @@ class CompanyController extends Controller
     public function getByClientId()
     {
         $clientId = Auth::user()->client->id;
+
         return new ApiJsonResponse(data: $this->service->getCompaniesByClientId($clientId));
     }
 }

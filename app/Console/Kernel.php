@@ -11,10 +11,9 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      */
-    protected function schedule(Schedule $schedule): void
+    protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
-        $schedule->job(ClearVerificationCodes::class)->everyMinute();
+        $schedule->command('events:process')->everyMinute();
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Enums\RepeatTypeEnum;
 use App\Models\Client;
 use App\Models\Company;
 use App\Models\Event;
+use App\Models\Service;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class EventFactory extends Factory
@@ -18,7 +19,6 @@ class EventFactory extends Factory
             'id' => $this->faker->uuid,
             'client_id' => Client::factory(),
             'company_id' => Company::factory(),
-            'name' => $this->faker->word,
             'description' => $this->faker->sentence,
             'event_type' => $this->faker->randomElement(['meeting', 'call', 'task']),
             'event_time' => $this->faker->dateTimeBetween('now', '+1 week'),

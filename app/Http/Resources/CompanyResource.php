@@ -15,7 +15,7 @@ class CompanyResource extends JsonResource
             'user_id' => $this->user_id,
             'name' => $this->name,
             'description' => $this->description,
-            'image' => $this->image ? Storage::url($this->image) : null,
+            'image' => $this->image ? url(Storage::url($this->image)) : null,
             'services' => ServiceResource::collection($this->services),
             'category' => $this->category,
             'address' => $this->address,

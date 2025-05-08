@@ -2,8 +2,11 @@
 
 namespace App\Http\Resources\Event;
 
+use App\Http\Resources\CompanyResource;
+use App\Http\Resources\ServiceResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class EventResource extends JsonResource
 {
@@ -11,13 +14,25 @@ class EventResource extends JsonResource
     {
         return [
             'id' => $this->getId(),
+            'company_client' => $this->companyClient,
+            'company' => $this->getCompany($this->company),
             'client_id' => $this->getClientId(),
             'company_id' => $this->getCompanyId(),
-            'name' => $this->getName(),
+            'service_ids' => $this->getServiceIds(),
+            'services' => ServiceResource::collection($this->services),
             'description' => $this->getDescription(),
             'event_type' => $this->getEventType(),
             'event_time' => $this->getEventTime(),
             'repeat_type' => $this->getRepeatType(),
+            'target_time' => $this->getTargetTime(),
+            'status' => $this->getStatus(),
+            'client' => $this->client,
+            'telegram_client' => $this->telegramClient,
+            'repeats' => $this->repeats,
         ];
+    }
+    private function getCompany(array $company){
+        $company['image'] = $company['image'] ? url(Storage::url($company['image'])) : null;
+        return $company;
     }
 }

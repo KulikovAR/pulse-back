@@ -17,11 +17,13 @@ class EventRequest extends FormRequest
         return [
             'id' => 'nullable|uuid',
             'client_id' => 'required|uuid|exists:clients,id',
-            'name' => 'required|string|max:255',
+            'service_ids' => 'required|array',
+            'service_ids.*' => 'required|uuid|exists:services,id',
             'description' => 'nullable|string',
-            'event_type' => 'required|string|in:meeting,task',
+            'event_type' => 'nullable|string|in:meeting,task',
             'event_time' => 'required|date|after:now',
-            'repeat_type' => ['required', new EnumRule(RepeatTypeEnum::class)],
+            'repeat_type' => ['nullable', new EnumRule(RepeatTypeEnum::class)],
+            'target_time' => 'nullable|date|after:now',
         ];
     }
 

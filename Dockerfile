@@ -15,12 +15,19 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     libmagickwand-dev \
+    libmagickcore-dev \
     imagemagick
-    
-RUN docker-php-ext-install soap
 
-# Install and enable PHP extensions
-RUN pecl install imagick && docker-php-ext-enable imagick
+# Install Imagick from source instead of PECL
+RUN git clone https://github.com/Imagick/imagick && \
+    cd imagick && \
+    phpize && \
+    ./configure && \
+    make && \
+    make install && \
+    docker-php-ext-enable imagick
+
+RUN docker-php-ext-install soap
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
