@@ -41,6 +41,17 @@ class TelegramClientService implements ClientInterface
         return null;
     }
 
+    private function validateTelegramAuthAdmin(string $initData): ?ApiJsonResponse
+    {
+        if (!$this->authChecker->checkTelegramAuthorization(
+            $initData,
+            env('TELEGRAM_BOT_TOKEN_BUSINESS')
+        )) {
+            return new ApiJsonResponse(data: ['error' => 'Unauthorized'], httpCode: 401);
+        }
+        return null;
+    }
+
     private function handleTelegramClientWithUser(TelegramClient $telegramClient): ApiJsonResponse
     {
         $client = $telegramClient->client;
@@ -136,7 +147,7 @@ class TelegramClientService implements ClientInterface
         $telegramInitData = $request->header('X-Telegram-InitData');
     
         // Validate Telegram authorization
-        if ($authError = $this->validateTelegramAuth($telegramInitData)) {
+        if ($authError = $this->validateTelegramAuthAdmin($telegramInitData)) {
             return $authError;
         }
 
